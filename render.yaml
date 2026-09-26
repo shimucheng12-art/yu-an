@@ -1,21 +1,55 @@
+# 余安 v4.0-beta · Render 蓝图
+# 双服务架构：
+#   yuan-beta（Next.js 主站，含 API + 数据库）
+#   yuan-chat（Socket.io 实时服务，消息推送 / 在线状态）
+# 共享密钥通过 envVarGroup 下发，保证 JWT / 内部广播签名一致。
+
+envVarGroups:
+  - name: yuan-secrets
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+        sync: false
+      - key: INTERNAL_SECRET
+        generateValue: true
+        sync: false
+
 services:
+  # —— 余安主站（Next.js）——
   - type: web
     name: yuan-beta
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run build
+    region: singapore
+    buildCommand: npm install && npm run build
     preDeployCommand: npx prisma db push
     startCommand: node .next/standalone/server.js
     healthCheckPath: /api
     envVars:
+      - fromEnvVarGroup: yuan-secrets
       - key: DATABASE_URL
         fromDatabase:
           name: yuan-db
           property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: INTERNAL_SECRET
-        generateValue: true
+      - key: NODE_ENV
+        value: production
+      # 浏览器端 Socket 连接地址（构建时注入）
+      - key: NEXT_PUBLIC_SOCKET_URL
+        value: https://yuan-chat.onrender.com
+      # 服务端内部广播目标（socket-admin 使用）
+      - key: CHAT_SERVICE_URL
+        value: https://yuan-chat.onrender.com
+
+  # —— 余安实时服务（Socket.io，端口 3003）——
+  - type: web
+    name: yuan-chat
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: npx tsx mini-services/chat-service/index.ts
+    envVars:
+      - fromEnvVarGroup: yuan-secrets
       - key: NODE_ENV
         value: production
 
