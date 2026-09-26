@@ -332,6 +332,12 @@
   .peer-name{flex:1;font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .peer-add{padding:6px 13px;border-radius:10px;background:#6d8bad;color:#fff;font-size:12.5px;border:none;cursor:pointer;font-weight:600}
   .peer-add:active{transform:scale(.94)}
+  .fr-act{padding:6px 11px;border-radius:10px;border:none;cursor:pointer;font-size:12.5px;font-weight:600;flex-shrink:0}
+  .fr-act:active{transform:scale(.94)}
+  .fr-act.a-sq{background:rgba(109,139,173,.16);color:#5f7f9f}
+  .fr-act.a-chat{background:#6d8bad;color:#fff}
+  .fr-act.a-del{background:rgba(217,138,154,.18);color:#b06b7c}
+  .btn-block{width:100%}
   .freq-body{display:flex;align-items:center;gap:13px;padding:6px 2px 14px}
   .freq-ava{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:21px;font-weight:700;flex-shrink:0}
   .freq-txt{display:flex;flex-direction:column;gap:3px}
@@ -633,6 +639,18 @@
       </div>
     </div>
 
+    <!-- 我的好友（管理） -->
+    <div class="modal" id="modalFriends">
+      <div class="sheet">
+        <h3>我的好友 <button class="x" data-close="modalFriends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></h3>
+        <p class="modal-tip">与好友可私聊、传文件、互看广场；解除后聊天记录将一并清除，双方实时同步。</p>
+        <div id="friendRows" class="peer-list"></div>
+        <div class="modal-btns">
+          <button class="btn btn-main btn-block" id="btnGoAddFriend">＋ 添加好友</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 图片查看 -->
     <div id="viewer">
       <button id="viewerClose" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -903,11 +921,19 @@
       case 'fok':
         if (m.to !== myId || isFriend(m.from.id)) return;
         friends.push({ id: m.from.id, name: m.from.name, since: now() }); saveFriends();
-        renderConvo(); renderMe(); updateDots();
+        renderConvo(); renderMe(); renderFriends(); updateDots();
         toast('🎉 ' + m.from.name + ' 已和你成为好友'); break;
       case 'fno':
         if (m.to !== myId) return;
         toast(m.from.name + ' 暂未接受好友请求'); break;
+      case 'fdel':
+        if (m.to !== myId || m.from.id === myId) return;
+        if (!isFriend(m.from.id)) return;
+        doUnfriend(m.from.id);
+        if ($('modalFSquare').classList.contains('on')) closeModal('modalFSquare');
+        if ($('modalFriends').classList.contains('on')) renderFriends();
+        toast('💔 ' + m.from.name + ' 解除了与你的好友关系');
+        break;
       case 'fr':
         if (m.to !== myId || m.msg.from.id === myId) return;
         if (!isFriend(m.msg.from.id)) return;
@@ -1043,6 +1069,52 @@
     closeModal('modalFreq');
     toast('已拒绝好友请求');
   };
+
+  /* ---- 好友管理与解除 ---- */
+  function doUnfriend(fid) {
+    friends = friends.filter(function (x) { return x.id !== fid; }); saveFriends();
+    delete dm[fid]; delete unread[fid]; saveDm(); saveUnread();
+    delete typingMap['f:' + fid];
+    if (chatTarget && chatTarget.id === fid) exitRoom(); else renderConvo();
+    renderSquare(); renderMe(); renderFriends(); updateDots();
+  }
+  function unfriend(fid) {
+    var f = friendById(fid); if (!f) return;
+    if (!confirm('确定解除与「' + f.name + '」的好友关系吗？\n双方的私聊记录将一并清除。')) return;
+    doUnfriend(fid);
+    sendBus({ t: 'fdel', from: { id: myId, name: me.name }, to: fid });
+    toast('已解除与 ' + f.name + ' 的好友关系');
+  }
+  function openFriends() { openModal('modalFriends'); renderFriends(); }
+  function renderFriends() {
+    var el = $('friendRows'); if (!el) return;
+    if (!friends.length) {
+      el.innerHTML = '<div class="picker-empty">还没有好友<br>点下方「添加好友」，即可私聊、传文件、互看广场</div>';
+      return;
+    }
+    var html = '';
+    friends.forEach(function (f) {
+      var online = peerOnline(f.id);
+      html += '<div class="peer-row">'
+        + '<div class="peer-ava" style="background:' + colorOf(f.name) + '">' + esc(f.name.charAt(0).toUpperCase()) + '</div>'
+        + '<div class="peer-name">' + esc(f.name)
+        + (online ? ' <span class="on-dot"></span>' : '')
+        + (f.id.indexOf('c:') === 0 ? ' <span class="badge-cloud">云端</span>' : '') + '</div>'
+        + '<button class="fr-act a-sq" data-act="sq" data-fid="' + esc(f.id) + '">广场</button>'
+        + '<button class="fr-act a-chat" data-act="chat" data-fid="' + esc(f.id) + '">私聊</button>'
+        + '<button class="fr-act a-del" data-act="del" data-fid="' + esc(f.id) + '">解除</button></div>';
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('.fr-act').forEach(function (b) {
+      b.onclick = function () {
+        var f = friendById(b.dataset.fid); if (!f) return;
+        if (b.dataset.act === 'sq') { closeModal('modalFriends'); openFriendSquare(f.id); }
+        else if (b.dataset.act === 'chat') { closeModal('modalFriends'); switchPage('chat'); enterRoom(f); }
+        else unfriend(f.id);
+      };
+    });
+  }
+  $('btnGoAddFriend').onclick = function () { closeModal('modalFriends'); openAddFriend(); };
 
   /* ---- TA 的广场 ---- */
   function openFriendSquare(fid) {
@@ -1417,7 +1489,7 @@
       + '<div class="name-edit"><input id="renameInput" maxlength="20" placeholder="修改显示昵称" value="' + esc(me.name) + '"><button id="renameBtn">保存</button></div>'
       + '</div>'
       + '<div class="me-card">'
-      + '<div class="me-row" id="meFriends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>我的好友<span class="hint">' + friends.length + ' 位 · 私聊 / 传文件 / 互看广场</span></div>'
+      + '<div class="me-row" id="meFriends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>我的好友<span class="hint">' + friends.length + ' 位 · 管理 / 私聊 / 互看广场</span></div>'
       + '<div class="me-row" id="meShareDiary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>分享碎碎念日记到广场<span class="hint">' + (cloud ? '已连接云端' : '需云端登录') + '</span></div>'
       + '<div class="me-row" onclick="window.open(\'https://shimucheng12-art.github.io/life/\',\'_blank\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>打开碎碎念网页版<span class="arrow">→</span></div>'
       + '<div class="me-row" id="meSettings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>设置<span class="arrow">→</span></div>'
@@ -1425,17 +1497,17 @@
       + '<div class="me-card">'
       + '<div class="me-row" id="meLogout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>' + (cloud ? '退出云端登录' : '退出游客身份') + '<span class="arrow">→</span></div>'
       + '</div>'
-      + '<div class="me-note">余安 · 演示版 v2<br>云端账号与碎碎念 APP 互通 · 消息与广场数据存于本地浏览器<br><a href="https://github.com/shimucheng12-art/yu-an" target="_blank" style="color:var(--accent-deep)">GitHub 源码</a></div>';
+      + '<div class="me-note">余安 · 演示版 v3<br>云端账号与碎碎念 APP 互通 · 好友私聊与广场数据存于本地浏览器<br><a href="https://github.com/shimucheng12-art/yu-an" target="_blank" style="color:var(--accent-deep)">GitHub 源码</a></div>';
     $('meScroll').innerHTML = html;
     $('renameBtn').onclick = function () {
       var v = $('renameInput').value.trim();
       if (v.length < 2 || v.length > 20) { toast('昵称需为 2-20 个字符'); return; }
       if (!/^[\u4e00-\u9fa5A-Za-z0-9_-]+$/.test(v)) { toast('仅支持中文、字母、数字、下划线和连字符'); return; }
-      me.name = v; try { sessionStorage.setItem(K_ME, JSON.stringify(me)); } catch (e) { } renderMe(); renderSide(); toast('昵称已更新');
+      me.name = v; try { sessionStorage.setItem(K_ME, JSON.stringify(me)); } catch (e) { } renderMe(); renderSide();
       $('topAvatar').textContent = v.trim().charAt(0).toUpperCase();
       toast('昵称已更新', true);
     };
-    $('meFriends').onclick = function () { switchPage('chat'); exitRoom(); openAddFriend(); };
+    $('meFriends').onclick = function () { openFriends(); };
     $('meShareDiary').onclick = function () {
       if (!getCloudAuth()) { toast('请先退出并以碎碎念云端账号登录'); return; }
       $('btnFromDiary').click();
@@ -1463,7 +1535,7 @@
   };
   $('setAbout').onclick = function () {
     closeModal('modalSettings');
-    toast('余安 v2 · 浮云深处，岁岁余安 🌤', true);
+    toast('余安 v3 · 浮云深处，岁岁余安 🌤', true);
   };
 
   /* ================= 搜索 ================= */
