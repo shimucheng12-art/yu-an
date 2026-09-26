@@ -6,7 +6,7 @@
 
 | 登录 | 聊天室 |
 | :---: | :---: |
-| ![登录页](docs/assets/screenshot-login.png) | ![聊天页](docs/assets/screenshot-chat.png) |
+| ![登录页](assets/screenshot-login.png) | ![聊天页](assets/screenshot-chat.png) |
 
 > **关于演示版**：GitHub Pages 只能托管静态网页，无法运行数据库与实时后端。因此在线演示版是纯前端实现——
 > 聊天记录与文件保存在**当前浏览器**中，**同一浏览器多开几个标签页**（用不同昵称进入）即可实时互聊，图片与文件分享均可体验。
@@ -34,8 +34,8 @@
 ## 项目结构
 
 ```
-├── docs/
-│   └── index.html              # GitHub Pages 演示版（自包含单文件，可直接双击打开）
+├── index.html                  # GitHub Pages 演示版（自包含单文件，可直接双击打开）
+├── assets/                     # README 截图
 ├── 团队公约.md                  # 团队使用约定
 ├── 晨光山谷.png                 # 示例素材（演示版内置分享示例）
 ├── prisma/schema.prisma         # 数据模型：User / Message
