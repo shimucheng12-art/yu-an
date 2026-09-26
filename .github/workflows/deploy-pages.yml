@@ -1,9 +1,10 @@
-# 将根目录的演示页（index.html）发布到 GitHub Pages
+# 将余安应用（index.html + assets 资源）发布到 GitHub Pages
 name: Deploy demo to Pages
 
 on:
   push:
     branches: [main]
+    paths: ['index.html', 'assets/**', '.github/workflows/deploy-pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -30,8 +31,9 @@ jobs:
 
       - name: Assemble site
         run: |
-          mkdir -p _site
+          mkdir -p _site/assets
           cp index.html .nojekyll _site/
+          cp assets/bg.jpg _site/assets/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
