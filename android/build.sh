@@ -12,7 +12,7 @@ PLAT="$SDK_ROOT/platforms/android-34/android.jar"
 [ -x "$BT/aapt2" ] || { echo "找不到 aapt2（$BT）"; exit 1; }
 [ -f "$PLAT" ] || { echo "找不到 android.jar（$PLAT）"; exit 1; }
 
-VER_CODE=31; VER_NAME=3.1
+VER_CODE=32; VER_NAME=3.2
 OUT=build; APK="../yu-an-v$VER_NAME.apk"
 rm -rf "$OUT"; mkdir -p "$OUT/classes"
 
@@ -38,7 +38,7 @@ echo "[5/7] 打包 + 对齐…"
 "$BT/zipalign" -f -p 4 "$OUT/base.apk" "$OUT/aligned.apk"
 
 echo "[6/7] 签名…"
-KS=../yu-an.keystore
+KS=${KS:-../yu-an.keystore}
 if [ ! -f "$KS" ]; then
   keytool -genkeypair -keystore "$KS" -alias yuan -keyalg RSA -keysize 2048 \
     -validity 10950 -storepass yuanyuan -keypass yuanyuan \
