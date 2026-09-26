@@ -33,7 +33,8 @@ loadEnvFromProjectRoot()
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-fallback-secret-do-not-use-in-prod'
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? 'dev-internal-secret'
-const PORT = 3003
+// Render 等平台通过 PORT 环境变量分配端口，本地开发默认 3003
+const PORT = Number(process.env.PORT ?? 3003)
 
 const secretKey = new TextEncoder().encode(JWT_SECRET)
 

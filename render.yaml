@@ -1,7 +1,9 @@
-# 余安 v4.0-beta · Render 蓝图
-# 双服务架构：
-#   yuan-beta（Next.js 主站，含 API + 数据库）
+# 余安 v4.0-beta · Render 蓝图（免绑卡方案）
+# 架构：
+#   yuan-beta（Next.js 主站，含 API）
 #   yuan-chat（Socket.io 实时服务，消息推送 / 在线状态）
+# 数据库使用 Neon 免费版（render.yaml 只创建两个免费 web 服务，
+# Render 对纯 web 服务不要求绑卡；DATABASE_URL 在部署时粘贴 Neon 连接串）。
 # 共享密钥通过 envVarGroup 下发，保证 JWT / 内部广播签名一致。
 
 envVarGroups:
@@ -21,16 +23,15 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     preDeployCommand: npx prisma db push
     startCommand: node .next/standalone/server.js
     healthCheckPath: /api
     envVars:
       - fromEnvVarGroup: yuan-secrets
+      # Neon 数据库连接串（postgresql://…?sslmode=require），部署时粘贴
       - key: DATABASE_URL
-        fromDatabase:
-          name: yuan-db
-          property: connectionString
+        sync: false
       - key: NODE_ENV
         value: production
       # 浏览器端 Socket 连接地址（构建时注入）
@@ -40,21 +41,15 @@ services:
       - key: CHAT_SERVICE_URL
         value: https://yuan-chat.onrender.com
 
-  # —— 余安实时服务（Socket.io，端口 3003）——
+  # —— 余安实时服务（Socket.io）——
   - type: web
     name: yuan-chat
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm install
+    buildCommand: npm install --include=dev
     startCommand: npx tsx mini-services/chat-service/index.ts
     envVars:
       - fromEnvVarGroup: yuan-secrets
       - key: NODE_ENV
         value: production
-
-databases:
-  - name: yuan-db
-    plan: free
-    databaseName: yuan
-    user: yuan
