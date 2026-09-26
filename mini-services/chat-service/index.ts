@@ -6,7 +6,7 @@ import { Server } from 'socket.io'
 import { jwtVerify } from 'jose'
 
 /**
- * 轻聊实时服务（端口 3003）：
+ * 余安实时服务（端口 3003）：
  * - 校验 JWT 后登记在线状态，广播 presence / 加入离开通知
  * - 转发“正在输入”提示
  * - 接收 Next.js API 的内部广播（需 INTERNAL_SECRET），把新消息推给所有客户端

@@ -38,7 +38,7 @@ import java.util.Locale;
  */
 public class MainActivity extends Activity {
 
-    private static final String HOME_URL = "https://shimucheng12-art.github.io/yu-an/";
+    private String homeUrl;
     private static final int REQ_FILE = 42;
 
     private WebView web;
@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         web = new WebView(this);
+        homeUrl = getString(R.string.home_url);
         setContentView(web);
 
         WebSettings s = web.getSettings();
@@ -109,7 +110,7 @@ public class MainActivity extends Activity {
         });
 
         if (state != null) web.restoreState(state);
-        else web.loadUrl(HOME_URL);
+        else web.loadUrl(homeUrl);
     }
 
     /* 把私聊里 data: 链接的文件保存到系统「下载」 */

@@ -45,71 +45,72 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.596 0.145 163.225);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* 余安 · 雾蓝粉莫兰迪基调（半透明，透出云层摄影背景） */
+  --background: oklch(0.975 0.006 250 / 0.6);
+  --foreground: oklch(0.25 0.02 260);
+  --card: oklch(1 0 0 / 0.62);
+  --card-foreground: oklch(0.25 0.02 260);
+  --popover: oklch(1 0 0 / 0.8);
+  --popover-foreground: oklch(0.25 0.02 260);
+  --primary: oklch(0.585 0.075 350);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.01 250 / 0.55);
+  --secondary-foreground: oklch(0.32 0.02 260);
+  --muted: oklch(0.955 0.008 250 / 0.5);
+  --muted-foreground: oklch(0.5 0.02 260);
+  --accent: oklch(0.94 0.012 250 / 0.55);
+  --accent-foreground: oklch(0.32 0.02 260);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.696 0.17 162.48);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.696 0.17 162.48);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.696 0.17 162.48);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
+  --border: oklch(0.9 0.012 255 / 0.65);
+  --input: oklch(0.92 0.01 255 / 0.55);
+  --ring: oklch(0.585 0.075 350 / 0.55);
+  --chart-1: oklch(0.6 0.08 255);
+  --chart-2: oklch(0.7 0.06 300);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.96 0.008 250 / 0.6);
+  --sidebar-foreground: oklch(0.25 0.02 260);
+  --sidebar-primary: oklch(0.64 0.055 258);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.94 0.012 250 / 0.55);
+  --sidebar-accent-foreground: oklch(0.32 0.02 260);
+  --sidebar-border: oklch(0.9 0.012 255 / 0.65);
+  --sidebar-ring: oklch(0.64 0.055 258 / 0.55);
+}
+
+.dark {
+  --background: oklch(0.21 0.015 260 / 0.55);
+  --foreground: oklch(0.96 0.005 250);
+  --card: oklch(0.25 0.015 260 / 0.62);
+  --card-foreground: oklch(0.96 0.005 250);
+  --popover: oklch(0.24 0.015 260 / 0.82);
+  --popover-foreground: oklch(0.96 0.005 250);
+  --primary: oklch(0.68 0.08 350);
+  --primary-foreground: oklch(0.16 0.01 260);
+  --secondary: oklch(0.3 0.015 260 / 0.55);
+  --secondary-foreground: oklch(0.96 0.005 250);
+  --muted: oklch(0.3 0.015 260 / 0.5);
+  --muted-foreground: oklch(0.75 0.01 250);
+  --accent: oklch(0.32 0.015 260 / 0.55);
+  --accent-foreground: oklch(0.96 0.005 250);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.68 0.08 350 / 0.6);
+  --chart-1: oklch(0.696 0.17 162.48);
+  --chart-2: oklch(0.6 0.08 255);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.25 0.015 260 / 0.6);
+  --sidebar-foreground: oklch(0.96 0.005 250);
+  --sidebar-primary: oklch(0.72 0.06 258);
+  --sidebar-primary-foreground: oklch(0.16 0.01 260);
+  --sidebar-accent: oklch(0.32 0.015 260 / 0.55);
+  --sidebar-accent-foreground: oklch(0.96 0.005 250);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.72 0.06 258 / 0.6);
 }
 
 @layer base {
@@ -119,6 +120,31 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+/* ===== 余安 · 云层摄影背景（雾蓝粉基调） ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("/bg-yuan.jpg") center / cover no-repeat;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(247,249,252,0.30), rgba(242,246,251,0.10) 46%, rgba(248,242,244,0.30));
+}
+html.dark body::before { filter: saturate(0.82) brightness(0.7); }
+html.dark body::after {
+  background: linear-gradient(180deg, rgba(28,36,50,0.56), rgba(22,28,40,0.46));
+}
+.bg-card, .bg-popover {
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  backdrop-filter: blur(20px) saturate(1.15);
 }
 
 /* 聊天区域自定义滚动条 */

@@ -40,7 +40,7 @@ export function MessageItem({ message, isOwn, compact, onPreviewImage }: Props) 
         <div
           className={cn(
             'rounded-2xl px-3.5 py-2 text-sm leading-relaxed shadow-sm',
-            isOwn ? 'rounded-br-md bg-emerald-600 text-white' : 'rounded-bl-md bg-muted text-foreground'
+            isOwn ? 'rounded-br-md bg-primary text-white' : 'rounded-bl-md bg-muted text-foreground'
           )}
         >
           {message.type === 'file' ? (

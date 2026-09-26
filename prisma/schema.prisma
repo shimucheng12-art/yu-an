@@ -1,11 +1,11 @@
-// 轻聊数据库模型：用户 + 消息（文字/文件统一存储）
+// 余安 Beta：云端账号、好友关系与消息
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../db/custom.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -16,15 +16,49 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   messages     Message[]
+  sentRequests FriendRequest[] @relation("FriendRequestSender")
+  receivedRequests FriendRequest[] @relation("FriendRequestReceiver")
+  friendships  Friendship[] @relation("FriendshipUser")
+  friendOf     Friendship[] @relation("FriendshipFriend")
+
+  @@index([username])
+}
+
+model FriendRequest {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   @default("pending") // pending | accepted | rejected
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  sender     User @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+  @@index([senderId, status])
+}
+
+model Friendship {
+  id       String   @id @default(cuid())
+  userId   String
+  friendId String
+  createdAt DateTime @default(now())
+  user     User @relation("FriendshipUser", fields: [userId], references: [id], onDelete: Cascade)
+  friend   User @relation("FriendshipFriend", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
 }
 
 model Message {
   id        String   @id @default(cuid())
-  type      String   @default("text") // text | file
-  content   String? // 文字内容（type = text）
-  fileName  String? // 原始文件名（type = file）
-  fileType  String? // MIME 类型
-  fileSize  Int? // 字节
+  type      String   @default("text")
+  content   String?
+  fileName  String?
+  fileType  String?
+  fileSize  Int?
   isImage   Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

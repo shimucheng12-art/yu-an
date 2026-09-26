@@ -2,18 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
-import {
-  ArrowDown,
-  Loader2,
-  LogOut,
-  MessageCircle,
-  Moon,
-  Paperclip,
-  Send,
-  Sun,
-  Users,
-} from 'lucide-react'
+import { ArrowDown, Cloud, Loader2, LogOut, MessageCircle, Paperclip, Send, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { ApiError, api, downloadBlob, getToken } from '@/lib/api-client'
 import { getSocket } from '@/lib/socket'
@@ -23,9 +12,9 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { UserAvatar } from '@/components/chat/user-avatar'
 import { MessageItem } from '@/components/chat/message-item'
+import { FriendsDialog } from '@/components/chat/friends-dialog'
 
 interface Props {
   user: AuthUser
@@ -53,6 +42,7 @@ export function ChatApp({ user, onLogout }: Props) {
   const [newCount, setNewCount] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const [imageViewer, setImageViewer] = useState<{ message: ChatMessage; url: string } | null>(null)
+  const [friendsOpen, setFriendsOpen] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const nearBottomRef = useRef(true)
@@ -61,9 +51,6 @@ export function ChatApp({ user, onLogout }: Props) {
   const onLogoutRef = useRef(onLogout)
   onLogoutRef.current = onLogout
 
-  const { theme, setTheme } = useTheme()
-  const [themeMounted, setThemeMounted] = useState(false)
-  useEffect(() => setThemeMounted(true), [])
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     requestAnimationFrame(() => {
@@ -366,13 +353,13 @@ export function ChatApp({ user, onLogout }: Props) {
   )
 
   return (
-    <div className="flex h-dvh flex-col bg-background text-foreground">
+    <div className="flex h-dvh flex-col text-foreground">
       {/* 顶栏 */}
       <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur sm:px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white" aria-hidden="true">
-          <MessageCircle className="h-4 w-4" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white" aria-hidden="true">
+          <Cloud className="h-4 w-4" />
         </div>
-        <h1 className="text-base font-bold tracking-tight">轻聊</h1>
+        <h1 className="text-base font-bold tracking-tight">余安</h1>
         <span
           className={cn(
             'hidden items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] sm:flex',
@@ -385,30 +372,15 @@ export function ChatApp({ user, onLogout }: Props) {
         </span>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          {/* 移动端在线成员 */}
-          <div className="md:hidden">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5 rounded-full" aria-label={`查看在线成员，当前 ${onlineUsers.length} 人`}>
-                  <Users className="h-4 w-4" aria-hidden="true" />
-                  {onlineUsers.length}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-56 p-2">
-                <p className="px-2 pb-1 pt-0.5 text-xs font-medium text-muted-foreground">在线成员 · {onlineUsers.length}</p>
-                {onlineList}
-              </PopoverContent>
-            </Popover>
-          </div>
-
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label="切换深浅主题"
+            onClick={() => setFriendsOpen(true)}
+            aria-label="好友"
+            title="好友"
             className="rounded-full"
           >
-            {themeMounted && theme === 'dark' ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+            <UserPlus className="h-4 w-4" aria-hidden="true" />
           </Button>
 
           <div className="mx-1 hidden h-6 w-px bg-border sm:block" aria-hidden="true" />
@@ -433,9 +405,9 @@ export function ChatApp({ user, onLogout }: Props) {
           </div>
           <div className="flex-1 px-2 pb-4">{onlineList}</div>
           <div className="border-t px-4 py-3 text-[11px] leading-relaxed text-muted-foreground">
-            消息与文件云端同步保存
+            好友关系与账号数据保存在云端
             <br />
-            换设备登录即可查看
+            换设备登录即可继续使用
           </div>
         </aside>
 
@@ -591,6 +563,8 @@ export function ChatApp({ user, onLogout }: Props) {
           </footer>
         </main>
       </div>
+
+      <FriendsDialog user={user} open={friendsOpen} onOpenChange={setFriendsOpen} />
 
       {/* 图片查看器 */}
       <Dialog open={!!imageViewer} onOpenChange={(open) => !open && setImageViewer(null)}>

@@ -2,7 +2,7 @@
 # 余安 Android APK 一键构建脚本（无需 Gradle）
 # 依赖：JDK 17+、Android build-tools 34、platform android-34（android.jar）
 # 用法：SDK_ROOT=/path/to/android-sdk ./build.sh
-# 产物：../yu-an-v3.1.apk（已 zipalign + apksigner 签名）
+# 产物：../yu-an-v4.0-beta.apk（已 zipalign + apksigner 签名）
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -12,7 +12,7 @@ PLAT="$SDK_ROOT/platforms/android-34/android.jar"
 [ -x "$BT/aapt2" ] || { echo "找不到 aapt2（$BT）"; exit 1; }
 [ -f "$PLAT" ] || { echo "找不到 android.jar（$PLAT）"; exit 1; }
 
-VER_CODE=32; VER_NAME=3.2
+VER_CODE=40; VER_NAME=4.0-beta
 OUT=build; APK="../yu-an-v$VER_NAME.apk"
 rm -rf "$OUT"; mkdir -p "$OUT/classes"
 

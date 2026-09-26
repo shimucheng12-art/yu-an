@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "轻聊 · 聊天室",
-  description: "轻量级多人聊天室：文字聊天、文件分享、云端存储",
-  keywords: ["聊天", "即时通讯", "文件分享", "聊天室"],
+  title: "余安 · 浮云深处，岁岁余安",
+  description: "余安 Beta：消息 · 好友 · 云端相伴的沟通小站",
+  keywords: ["余安", "聊天", "好友", "云端", "沟通小站"],
 };
 
 export const viewport: Viewport = {

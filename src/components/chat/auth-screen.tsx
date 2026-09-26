@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, MessageCircle } from 'lucide-react'
+import { Cloud, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api-client'
 import type { AuthUser } from '@/types/chat'
@@ -51,7 +51,7 @@ export function AuthScreen({ onAuthed }: Props) {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-emerald-50 via-background to-teal-50 p-4 dark:from-emerald-950/40 dark:via-background dark:to-teal-950/30">
+    <div className="flex min-h-dvh items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,12 +59,12 @@ export function AuthScreen({ onAuthed }: Props) {
         className="w-full max-w-sm"
       >
         <div className="mb-6 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/25">
-            <MessageCircle className="h-7 w-7" aria-hidden="true" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/30">
+            <Cloud className="h-7 w-7" aria-hidden="true" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight">轻聊</h1>
-            <p className="mt-1 text-sm text-muted-foreground">文字聊天 · 文件分享 · 云端存储</p>
+            <h1 className="text-2xl font-bold tracking-tight">余安</h1>
+            <p className="mt-1 text-sm text-muted-foreground">消息 · 好友 · 云端相伴</p>
           </div>
         </div>
 

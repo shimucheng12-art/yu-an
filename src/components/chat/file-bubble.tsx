@@ -101,7 +101,7 @@ export function FileBubble({ message, isOwn, onPreviewImage }: Props) {
       <div
         className={cn(
           'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-          isOwn ? 'bg-white/20 text-white' : 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400'
+          isOwn ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
         )}
         aria-hidden="true"
       >
@@ -122,7 +122,7 @@ export function FileBubble({ message, isOwn, onPreviewImage }: Props) {
         aria-label={`下载文件 ${message.fileName ?? ''}`}
         className={cn(
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
-          isOwn ? 'text-white/80 hover:bg-white/20 hover:text-white' : 'text-muted-foreground hover:bg-emerald-600/10 hover:text-emerald-600'
+          isOwn ? 'text-white/80 hover:bg-white/20 hover:text-white' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
         )}
       >
         {downloading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}

@@ -1,6 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
-import type { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-fallback-secret-do-not-use-in-prod'
@@ -49,7 +48,7 @@ const USER_SELECT = {
 } as const
 
 /** 优先从 Authorization: Bearer 解析当前用户，解析失败返回 null */
-export async function getUserFromRequest(req: NextRequest): Promise<SafeUser | null> {
+export async function getUserFromRequest(req: Request): Promise<SafeUser | null> {
   const authHeader = req.headers.get('authorization')
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null
   if (!token) return null

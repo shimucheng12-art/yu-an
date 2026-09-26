@@ -1,4 +1,4 @@
-# 余安 · 浮云深处，岁岁余安
+# 余安 Beta · 浮云深处，岁岁余安
 
 一个轻盈的沟通小站：**消息 · 好友 · 广场**，与「碎碎念」APP 账号云端互通。
 
@@ -83,9 +83,91 @@
 
 `src/` 目录保留了上一代的完整全栈实现（Next.js 16 + Prisma/SQLite + Socket.io + JWT 账号系统），本地运行与部署方法见提交历史中的旧版 README。
 
-## ⚠️ 说明
+## ☁️ 余安 Beta 云端版
 
-当前线上为纯前端版本：消息与广场数据保存在浏览器本地（localStorage），清空浏览器数据会丢失；「完整版」需要自建后端。
+本版本的目标是彻底脱离浏览器本地数据，核心账号与好友关系由云端 API + PostgreSQL 保存。
+
+### 内测范围
+
+目前只优先保证一件事：**跨设备添加好友**。
+
+流程：
+
+1. 设备 A 注册/登录账号；
+2. 在「好友」里按用户名搜索设备 B 的账号；
+3. A 发送好友请求；
+4. B 在另一台手机登录同一云端服务；
+5. B 打开「好友」即可看到请求并同意；
+6. 双方好友关系写入云端，两台设备都可以继续看到好友关系。
+
+好友请求不是依赖 localStorage，也不要求双方同时在线；好友窗口打开时会自动刷新云端状态。
+
+### 无需自建服务器
+
+仓库附带 `render.yaml`，可以使用 Render 托管 Next.js 服务和 PostgreSQL。部署后 Android APK 的 `android/res/values/strings.xml` 中的 `home_url` 指向云端地址即可。
+
+> 当前环境没有你的 Render/Vercel 云端账号授权，因此这里不能替你创建第三方云服务账号或替你生成生产数据库。代码已经按托管部署方式准备好。
+
+### 本地/云端部署
+
+环境变量见 `.env.example`：
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `INTERNAL_SECRET`
+
+数据库为 PostgreSQL。首次部署后执行：
+
+```bash
+npx prisma db push
+```
+
+然后启动：
+
+```bash
+npm run build
+npm run start
+```
+
+### Android Beta
+
+Android 壳默认地址：
+
+```text
+https://yuan-beta.onrender.com/
+```
+
+如果你的云端服务使用其他域名，只需修改：
+
+```text
+android/res/values/strings.xml
+```
+
+中的 `home_url` 后重新运行：
+
+```bash
+cd android
+./build.sh
+```
+
+产物为 `yu-an-v4.0-beta.apk`。
+
+### 当前版本与旧版的区别
+
+旧版好友逻辑依赖浏览器本地机制，因此换设备无法可靠共享好友关系。
+
+Beta 版新增：
+
+- 云端 User / FriendRequest / Friendship 数据模型
+- 用户名搜索
+- 发送好友请求
+- 离线好友请求
+- 跨设备接受好友请求
+- 好友关系双向持久化
+- 解除好友
+- 好友数据 10 秒自动刷新
+- 更简洁的好友弹窗入口
+
 
 ## 许可
 

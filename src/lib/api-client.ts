@@ -1,6 +1,6 @@
 'use client'
 
-export const TOKEN_KEY = 'qingliao-token'
+export const TOKEN_KEY = 'yuan-token'
 
 export class ApiError extends Error {
   status: number

@@ -42,7 +42,7 @@ export default function Home() {
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-background text-muted-foreground">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-3 text-muted-foreground">
         <Loader2 className="h-7 w-7 animate-spin" aria-hidden="true" />
         <p className="text-sm">正在恢复登录状态…</p>
       </div>
