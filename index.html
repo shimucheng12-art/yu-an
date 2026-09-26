@@ -217,7 +217,7 @@
   .side-title{font-size:21px;font-weight:600;letter-spacing:.1em}
   .side-slogan{font-size:11px;color:var(--ink-3);margin-top:3px;letter-spacing:.06em}
   .side-menu{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
-  .side-item{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:15px;font-size:15px;color:var(--ink);transition:.18s;cursor:pointer}
+  .side-item{position:relative;display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:15px;font-size:15px;color:var(--ink);transition:.18s;cursor:pointer}
   .side-item svg{width:20px;height:20px;color:var(--ink-2)}
   .side-item.active{background:linear-gradient(135deg,var(--accent-2),var(--accent-deep));color:#fff;box-shadow:0 10px 24px -8px rgba(100,128,156,.55)}
   .side-item.active svg{color:#fff}
@@ -286,6 +286,67 @@
     display:flex;align-items:center;gap:9px;box-shadow:0 10px 26px -12px rgba(70,88,110,.4);line-height:1.5}
   #demoBanner .bx{margin-left:auto;flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink-3)}
   #demoBanner .bx svg{width:13px;height:13px}
+
+  /* ============ 好友系统 v3 ============ */
+  #convoList{flex:1;min-height:0;display:flex;flex-direction:column}
+  #convoList.hidden{display:none}
+  #chatRoom.hidden{display:none}
+  .convo-top{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;font-size:17px;font-weight:700;color:var(--ink)}
+  .convo-top button{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.5);border:1px solid var(--line-soft);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .convo-top button:active{transform:scale(.92)}
+  .convo-top button svg{width:18px;height:18px}
+  #convoRows{flex:1;overflow-y:auto;padding:4px 10px 16px}
+  .convo-row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:16px;cursor:pointer}
+  .convo-row:active{background:rgba(255,255,255,.45)}
+  .convo-ava{width:46px;height:46px;border-radius:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:600}
+  .convo-ava.hall{background:linear-gradient(135deg,#a9c0d8,#8ba6c4);font-size:21px}
+  .convo-main{flex:1;min-width:0}
+  .convo-name{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--ink)}
+  .convo-name .on-dot{width:7px;height:7px;border-radius:50%;background:#7fc08b;box-shadow:0 0 0 3px rgba(127,192,139,.22)}
+  .convo-sub{font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+  .convo-side{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .convo-time{font-size:11px;color:var(--ink-3)}
+  .dot-unread{min-width:18px;height:18px;border-radius:9px;background:#d98a9a;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  #chatHead{flex-shrink:0;height:50px;display:flex;align-items:center;gap:8px;padding:0 8px 0 4px;border-bottom:1px solid var(--line-soft);background:rgba(255,255,255,.3)}
+  #chatHead button{width:36px;height:36px;border-radius:12px;background:transparent;border:none;color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  #chatHead button:active{background:rgba(255,255,255,.5)}
+  #chatHead button svg{width:20px;height:20px}
+  #chatHead .ch-title{flex:1;min-width:0;font-size:15.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #chatHead .ch-sub{display:block;font-size:11px;font-weight:400;color:var(--ink-3)}
+  .file-card{display:flex;align-items:center;gap:10px;min-width:190px;max-width:240px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.75);border:1px solid var(--line-soft)}
+  .file-card .fc-ico{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#c7d6e6,#aebfd4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .file-card .fc-ico svg{width:19px;height:19px;color:#fff}
+  .file-card .fc-main{flex:1;min-width:0}
+  .file-card .fc-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-card .fc-size{font-size:11px;color:var(--ink-3);margin-top:2px}
+  .file-card .fc-dl{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;color:var(--ink-2)}
+  .file-card .fc-dl svg{width:15px;height:15px}
+  .file-card.own{background:linear-gradient(135deg,#b8cfe6,#a3bdd9);border-color:rgba(255,255,255,.5)}
+  .file-card.own .fc-name{color:#fff}
+  .file-card.own .fc-size{color:rgba(255,255,255,.75)}
+  .file-card.own .fc-dl{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.4);color:#fff}
+  .modal-tip{font-size:12.5px;color:var(--ink-3);line-height:1.6;margin:2px 0 12px}
+  .peer-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+  .peer-row{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid var(--line-soft)}
+  .peer-ava{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;flex-shrink:0}
+  .peer-name{flex:1;font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .peer-add{padding:6px 13px;border-radius:10px;background:#6d8bad;color:#fff;font-size:12.5px;border:none;cursor:pointer;font-weight:600}
+  .peer-add:active{transform:scale(.94)}
+  .freq-body{display:flex;align-items:center;gap:13px;padding:6px 2px 14px}
+  .freq-ava{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:21px;font-weight:700;flex-shrink:0}
+  .freq-txt{display:flex;flex-direction:column;gap:3px}
+  .freq-txt b{font-size:16px;color:var(--ink)}
+  .freq-txt span{font-size:12.5px;color:var(--ink-3)}
+  .modal-btns{display:flex;gap:10px}
+  .fs-sheet{max-height:78%}
+  .fs-feed{max-height:56vh;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:2px 2px 8px}
+  .badge-friend{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;color:#6d8bad;background:rgba(125,151,181,.14);border-radius:6px;padding:1.5px 6px;font-weight:600}
+  .pname-link{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(125,151,181,.4);text-underline-offset:3px}
+  .side-dot{position:absolute;top:50%;right:14px;transform:translateY(-50%);min-width:17px;height:17px;border-radius:9px;background:#d98a9a;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .tab-dot{position:absolute;top:6px;right:calc(50% - 24px);min-width:16px;height:16px;border-radius:8px;background:#d98a9a;color:#fff;font-size:9.5px;display:none;align-items:center;justify-content:center;padding:0 4px}
+  .tab-dot.on{display:flex}
+  .tab{position:relative}
+
 </style>
 </head>
 <body>
@@ -349,7 +410,7 @@
 
     <!-- 演示提示 -->
     <div id="demoBanner">
-      <span>🪟 演示版：数据保存在当前浏览器，<b>同一浏览器多开标签页</b>即可实时互聊。</span>
+      <span>🪟 演示版：数据保存在当前浏览器。多开标签页（不同身份）→ 消息页右上角 <b>＋ 加好友</b>，即可私聊、传文件、互看广场。</span>
       <button class="bx" id="bannerClose" aria-label="关闭提示"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
 
@@ -358,8 +419,29 @@
 
       <!-- 消息页 -->
       <section class="page active" id="pageChat">
-        <div id="filterBarChat" class="filter-bar"><span id="filterInfoChat"></span><button class="clear" id="filterClearChat">清除筛选</button></div>
-        <div id="chatScroll"></div>
+        <!-- 会话列表视图 -->
+        <div id="convoList">
+          <div class="convo-top">
+            <span>消息</span>
+            <button id="btnAddFriend" aria-label="添加好友" title="添加好友">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            </button>
+          </div>
+          <div id="convoRows"></div>
+        </div>
+        <!-- 聊天视图（大厅 / 好友私聊） -->
+        <div id="chatRoom" class="hidden">
+          <header id="chatHead">
+            <button id="btnBackConvo" aria-label="返回会话列表">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="ch-title" id="chatTitle">余安大厅</div>
+            <button id="btnSeeSquare" class="hidden" aria-label="查看 TA 的广场" title="查看 TA 的广场">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+            </button>
+          </header>
+          <div id="filterBarChat" class="filter-bar"><span id="filterInfoChat"></span><button class="clear" id="filterClearChat">清除筛选</button></div>
+          <div id="chatScroll"></div>
         <button id="scrollBtn" class="hidden">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m7-7-7 7-7-7"/></svg>
           <span id="scrollBtnText">回到底部</span>
@@ -367,6 +449,10 @@
         <div id="typingHint"><span class="tdots hidden" id="tdots"><i></i><i></i><i></i></span><span id="typingText"></span></div>
         <footer id="composer">
           <input type="file" id="fileInput" accept="image/*" class="hidden">
+          <input type="file" id="dmFileInput" class="hidden">
+          <button class="round-btn tool" id="btnFile" aria-label="发送文件" title="发送文件">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
           <button class="round-btn tool" id="btnImg" aria-label="发送图片" title="发送图片">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.6-4.6a2 2 0 0 0-2.8 0L5 20"/></svg>
           </button>
@@ -375,6 +461,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
           </button>
         </footer>
+        </div>
       </section>
 
       <!-- 广场页 -->
@@ -422,7 +509,7 @@
         </button>
       </div>
       <nav class="side-menu">
-        <button class="side-item active" data-goto="chat">
+        <button class="side-item active" data-goto="chat"><span class="side-dot" id="sideMsgDot" style="display:none"></span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
           消息
         </button>
@@ -514,6 +601,38 @@
       </div>
     </div>
 
+    <!-- 添加好友 -->
+    <div class="modal" id="modalAddFriend">
+      <div class="sheet">
+        <h3>添加好友 <button class="x" data-close="modalAddFriend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></h3>
+        <p class="modal-tip">同一浏览器多开标签页、以不同身份进入的用户会出现在这里。向对方发送好友请求，对方接受后即可私聊、传文件、互看广场。</p>
+        <div id="peerList" class="peer-list"><div class="picker-empty">正在获取在线用户…</div></div>
+      </div>
+    </div>
+
+    <!-- 好友请求 -->
+    <div class="modal" id="modalFreq">
+      <div class="sheet">
+        <h3>好友请求</h3>
+        <div class="freq-body">
+          <div class="freq-ava" id="freqAva">?</div>
+          <div class="freq-txt"><b id="freqName">…</b><span>请求加你为好友</span></div>
+        </div>
+        <div class="modal-btns">
+          <button class="btn btn-ghost" id="btnFreqNo">拒绝</button>
+          <button class="btn btn-main" id="btnFreqYes">接受</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TA 的广场 -->
+    <div class="modal" id="modalFSquare">
+      <div class="sheet fs-sheet">
+        <h3><span id="fsName">…</span> 的广场 <button class="x" data-close="modalFSquare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></h3>
+        <div id="fsFeed" class="fs-feed"></div>
+      </div>
+    </div>
+
     <!-- 图片查看 -->
     <div id="viewer">
       <button id="viewerClose" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -580,10 +699,38 @@
   var MAX_IMG_PX = 1280, MAX_MSGS = 200, MAX_POSTS = 200;
 
   var me = null;          // {name, cloud:{phone,uid,exp}|null}
-  var msgs = [];          // {id,from:{name},type:'text'|'image',text,img,t}
-  var posts = [];         // {id,author:{name,cloud},type, text,img, diary, likes, liked, t, seed}
-  var peers = {};         // id -> {name}
+  var myId = null;       // 稳定用户标识：云端 'c:uid' / 游客 'g:uid'
+  var msgs = [];          // {id,from:{id,name},type,text,img,fname,size,data,t}
+  var posts = [];         // {id,author:{id,name,cloud},type,text,img,diary,likes,liked,t,seed}
+  var peers = {};         // busId -> {uid, name}
   var typingMap = {};     // name -> expire
+  var friends = [];       // [{id,name,since}]
+  var dm = {};            // fid -> [msgs]
+  var unread = {};        // {all:n, fid:n}
+  var chatTarget = null;  // null=会话列表 | 'all'=大厅 | {id,name}=私聊
+  var freqFrom = null;    // 当前好友请求发起方
+  var MAX_FILE = 2 * 1024 * 1024;
+  function K_FR() { return 'yuan.fr_' + myId; }
+  function K_DM() { return 'yuan.dm_' + myId; }
+  function K_UNREAD() { return 'yuan.unread_' + myId; }
+  function isFriend(id) { return friends.some(function (f) { return f.id === id; }); }
+  function friendById(id) { for (var i = 0; i < friends.length; i++) if (friends[i].id === id) return friends[i]; return null; }
+  function saveFriends() { saveJSON(K_FR(), friends); }
+  function saveDm() { saveJSON(K_DM(), dm); }
+  function saveUnread() { saveJSON(K_UNREAD(), unread); }
+  function totalUnread() { var s = 0; for (var k in unread) s += unread[k] || 0; return s; }
+  function peerOnline(fid) { for (var k in peers) if (peers[k] && peers[k].uid === fid) return true; return false; }
+  function canSeePost(p) { var aid = (p.author && p.author.id) || 'sys'; return aid === 'sys' || aid === myId || isFriend(aid); }
+  function updateDots() {
+    var t = totalUnread();
+    var tb = document.querySelector('.tab[data-tab="chat"]');
+    var tabDot = tb ? tb.querySelector('.tab-dot') : null;
+    if (tb && !tabDot) { tabDot = document.createElement('span'); tabDot.className = 'tab-dot'; tb.appendChild(tabDot); }
+    if (tabDot) { tabDot.textContent = t > 99 ? '99+' : t; tabDot.classList.toggle('on', t > 0); }
+    var sd = $('sideMsgDot');
+    if (sd) { sd.textContent = t > 99 ? '99+' : t; sd.style.display = t > 0 ? 'flex' : 'none'; }
+  }
+  function fmtSize(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
   var curPage = 'chat';
   var pickDiaryIdx = -1, diariesCache = null;
   var composeImg = null;
@@ -675,30 +822,33 @@
   /* ================= 进入应用 ================= */
   function enterChat(identity) {
     me = identity;
+    myId = me.cloud ? ('c:' + me.cloud.uid) : ('g:' + (sessionStorage.getItem('yuan.gid') || (function () { var g = uid(); sessionStorage.setItem('yuan.gid', g); return g; })()));
+    friends = loadJSON(K_FR(), []);
+    dm = loadJSON(K_DM(), {});
+    unread = loadJSON(K_UNREAD(), {});
+    updateDots();
     try { sessionStorage.setItem(K_ME, JSON.stringify({ name: me.name, cloud: me.cloud || null })); } catch (e) { }
     $('loginView').classList.add('hidden');
     $('appView').classList.remove('hidden');
     if (loadJSON(K_BANNER, null) === 'off') $('demoBanner').classList.add('hidden');
     helloBus();
     $('btnFromDiary').classList.toggle('hidden', !getCloudAuth());
-    renderChat(); renderSquare(); renderMe(); renderSide();
-    updateOnline();
-    scrollChat(true);
-    try { $('msgInput').focus(); } catch (e) { }
+    renderConvo(); renderSquare(); renderMe(); renderSide();
+    updateOnline(); updateDots();
   }
 
   /* ================= 初始化数据（首次访问播种） ================= */
   (function seed() {
     if (localStorage.getItem(K_MSGS) === null) {
-      var helper = { name: '余安小助手' };
+      var helper = { id: 'sys', name: '余安小助手' };
       msgs = [
-        { id: uid(), from: helper, type: 'text', text: '欢迎来到余安 ☁️ 这里是消息页，文字与图片都可以发送。', t: now() - 300000 },
-        { id: uid(), from: helper, type: 'text', text: '同一浏览器多开几个标签页就能实时互聊；左侧菜单可以逛广场、看我的～', t: now() - 240000 }
+        { id: uid(), from: helper, type: 'text', text: '欢迎来到余安 ☁️ 点右上角 ＋ 可添加好友，与好友私聊、互传文件。', t: now() - 300000 },
+        { id: uid(), from: helper, type: 'text', text: '同一浏览器多开几个标签页（不同身份）就能实时互聊；广场只对好友开放彼此的动态哦～', t: now() - 240000 }
       ];
       saveJSON(K_MSGS, msgs);
     } else msgs = loadJSON(K_MSGS, []);
     if (localStorage.getItem(K_POSTS) === null) {
-      var au = { name: '余安小助手' };
+      var au = { id: 'sys', name: '余安小助手' };
       posts = [
         { id: uid(), author: au, type: 'text', text: '广场开张啦 🎏 可以随手记录此刻，也可以把碎碎念里的日记搬上来。', likes: 2, liked: false, t: now() - 500000, seed: true },
         { id: uid(), author: au, type: 'image', text: '今天的天空，分享给你。', img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA3AAAAIwCAIAAABIpx5YAAAu8klEQVR42u3dy68kWX7Y99+JyLyPekxVdQ8IaNg9Y1MGvNHCIGxo56VMUx4a/gesjTc2DP8DAgz4n5AhSBsbkNejoR6QloIAg5JB29KCBtwi2Q9yyHF3V1fXvVU3HxHHi6x7O+87H5GZ8fh8FgOwWV19b2TEiW+eE49UT34VAACwqVHO2VYAAGBjhU0AAICgBABAUAIAICgBABCUAAAgKAEAEJQAAAhKAAAGYeSx5gAAbMMMJQAAghIAAEEJAICgBABgiEYRbssBAGBzZigBABCUAAAISgAAOmqUXUIJAMAWzFACACAoAQAQlAAACEoAAAQlAAAISgAABCUAAIISAABBCQAAjxrl8KocAAA2Z4YSAABBCQCAoAQAQFACACAoAQBAUAIAICgBABCUAAAMwyh7rjkAAFswQwkAgKAEAEBQAgAgKAEAGKJRhLtyAADYnBlKAAAEJQAAghIAgI4auYISAIBtmKEEAEBQAgAgKAEAEJQAAAhKAAAQlAAACEoAAAQlAACCEgAAHjXK2btyAADYnBlKAAAEJQAAghIAAEEJAICgBAAAQQkAgKAEAEBQAgAwDCOPNQcAYBtmKAEAEJQAAAhKAAAEJQAAQzSKcFsOAACbM0MJAICgBABAUAIA0FGj7BJKAAC2YIYSAABBCQCAoAQAQFACACAoAQBAUAIAICgBABCUAAAISgAAeNQoh1flAACwOTOUAAAISgAABCUAAIISAABBCQAAghIAAEEJAICgBABgGEbZc80BANiCGUoAAAQlAACCEgAAQQkAwBCNItyVAwDA5sxQAgAgKAEAEJQAAHTUyBWUAABswwwlAACCEgAAQQkAgKAEAEBQAgCAoAQAQFACACAoAQAQlAAA8KhRzt6VAwDA5sxQAgAgKAEAEJQAAAhKAAAEJQAACEoAAPZpZBMAMAw54tEn5aWIZEuBoASA2wVZper7FNVj/0KZyx9FlPoS1gtKjzUHoI8dWRXV9/GhIOtUvz25+P2o30bU9/+LRRTPL05+novnl5eElfWHvlSW8JD03fd/bCsA0JuOTNX3KWapfnt88fvpsiBTVOmHvnxAmcsf5Q8zlEUunk9Ofp6L5znGWVmCoASgv+rbHZlidr0gV7mA8sOZcSkZF305vqss3dUKghKA/qTkd0X93a2OXL0gV+nLa2VZFy9z+VJWgqAEoD8pWdTfpeq7RjvygbJ8WRcvZSXcCMp/ZysA0B05Yp6qN0X9+vjiHy2lZL2vH6BYysr/oi5e5fJFxMi1lQhKAOiE2VJKvk7Vm/2m5O2sfFEXr5aycuwTQlACQKtrsph/cfL+l4dOybuz8uL09+rRTzUlw+SyDwDar46YFvMvTt/9opx9nqpvI2YtqMnFDzZL1bfl7PPTd78o5l9ETNvxg8FepddvzFAC0Gazon6T6ten739ZzL+ImLX15xzXo5++P/29XLyqC8vfCEoAaE9NVl+cvvtlyq+L6k2La/KyKcsXOb16/+T36tLyNwNiyRuAVtfkk/NflPPPiw/L3O3/gb8t558/Of9FUX3RhR8YBCUAA6jJourWhYl1xHTpJ9eUCEoAOHxNzvz8ICgBYIA1pikRlACgw/wuICgBUGB+IxCUAAxHXVRvTt//sqi+7Fd7zYrqy9P3vyyqN555jqAEgJ2ap/p1ql9HzP1q0C2jHNlWAODQZmX1xUlvp/Hqonpz8v6X74v/svLAc/rIDCUAbajJL0/P/2HZ5wsNZ2X1xen5Pyz7tqAPghKAw6vL6s3J+18OoLRmZfXlyftfli6mRFACQKOqlIdzfeE81a9Tfh1R+eARlADQiLqs3hy//8eDmbQb2u+LoASAnatSHtqM3QB/ZQQlAOzKMKfrTFIiKAGgMYOdqzNJiaAEgAYMeaLOJCV9M8qeaw7AAVQx6Pudq5RfR/06Fy9M7tADdmIA9q8uq+9PLoY8RVeX1ZuTi39cVt+bpERQAsBm5il/P+yLCKuUv/d2bwQlAGgpVQ2CEoB9u1rvHvhqr+1Af4wi3JUDwD5lM3OXrmZqs9MxnWaGEoD9V9Qb692X5im/0dYISgBY3WKd959Y57U1EJQAsLHKeretQc+MXLIBwD7lq//hcpO4gpKuM0MJwCGSEtsEQQkAG7HCa5sgKAFgc3VZfX/qHhTbBEEJAFswG2ebICgBYFuuF7RNEJQAACAoAQAQlAAACEoAALpvlLMLgQHYj+yk89Cm8cYcOssMJQAAghIAAEEJAICgBIBVJJvANkFQAsDGyjr9KKK0IWwTBCUAbHLSqcofXRz/51X5Iycg2wRBCQCbMRtnmyAoAWBbrhe0TeibkSeoArBPWT/dqkkPNKfrzFACsGdWeG0NBCUAbHHeqcofvXcPiq2BoASALSzm5EY2REREjMxQIigBQEVpawZ/SLsOGID9SlX5/P3x7xT5fyur1xH1ULfDYr37d6ryeURyOqbbe7NNAMDemZlbMFOLoAQALaWqQVACcJCzz+Vq74uhnomKqnzx/vh33N9NT74gZtdsAHAAZZVe1fGqjDeDvIyyrONVlV7lbL2bXnxDsgkAOMgJqCpevDv5naoY4CTlkH93BCUANKms06s6vRrelZSD/cURlADQ9DlokBN1picRlADQpAHO1ZmeRFACQKOnoYFN15meRFACQPPKOr2q0qthPJFxVJmeRFACQONnoqp48e70b86LTyLGvf5Nx/Pik3enf9P0JIISAHZRWp+ePfm9efFpf5tyCL8jghIADtxbn5z3dvauqIoX54OYhWWgRjm8KgeANiir9LJKr8r4PmLas7NtlV5V6WWOMpx26SMzlAC05ZRUFS/enf7urG/TeONZ8cm709916SSCEgD2016fnj/5+aw/Fxr27zcCQQmAAvO7gKAEQFP6LUBQAkC/a0xNIigBoF1NdtSdE1YRcaQmEZQA0K6mnJY/q4qPuhBn46r4aFr+TE0yNOkvvv1/bAUAWmxW1m+K/Prp+38yrr+MmLU6f09/t06vquKFmmRYQfmrbwQlAC1XR8zH9VfP3v/+uP4qYh5Rt+nHKyJGs+KTs9Ofz4pPIkYWABkaezwAnThbHc2KT89Ofz4tf1alxfJ30Y4fbFylj6blz85OO3e5JzTGDCUAHTIr85uyfv1k8s/K+nWZ30RUB5qtLCLKKr2oilfvjv+zqnhVJcvcCEoA6IY6ojpoVt6ZkqWJSQQlAPQjK3NE3tEZMyJJSbgvKP/IVgCgm3LE/DIr/3mZv488K/PbRsvyqiOfRxpX6Ufvjv/GZUqOIpLPAAQlAD2wmK18G3lW5u9vleVVeq7Yl2kpE693ZPpRpHGVnpuVBEEJQC8tkvFWWS46Ms+v9+V9FgU5Wpwi7+rIZFYSBCUAgyrL+eKf3OzLe86JPxTkohrTSEfCSkH554ISgD6X5cJyXz5wVrwqyA//t46EVYxsAgB6ajkHiyq9ipTX+VcAQQkAYhH2wk1qAAAISgAABCUAAIISAABBCQAAghIAAEEJAEBnjHLOtgIAABszQwkAgKAEAEBQAgAgKAEAEJQAACAoAQAQlAAACEoAAIZh5LHmAABswwwlAACCEgAAQQkAgKAEAGCIRhFuywEAYHNmKAEAEJQAAAhKAAA6apRdQgkAwBbMUAIAICgBABCUAAAISgAABCUAAAhKAAD2aWQTAJ1QRcwaeldsihhHlLYpgKAEBhWRk4ivTmaTJv7a44hPLsbHQhNAUAKDisgcMYuomvhPTCM+O5kloQnQVFDm8Koc4ADqe5awJxFfncwbj8gbzVqtHZqj46W4dPk5wLWgtAmAvVmefZxGfHkyn976MzuKyK1Dc74IzaOITy9GR0txaeYSQFACh4nIA4bjNqF5Z1wqS0BQAuywIzsakWvF5aIsj2UlICgBGkzJyWVH9iAiH43LRVkem7AEBCXA9h15NSU56W9H3leWs+sTlq6zBAQlwCYd2e8pyVWyMtzEAwhKgLVScjL4jnygLMNNPICgBLivI4e5tN1UXLqJB+hbUGbPNQdWUEfM0mVHHs+nyZTk5nH54SaeHJ9OLicss4elA10OSpsAeDwlIy5SfHU8n0REimlEbbtsXZbTFJ+dzCPHccQnk9FxRMpewwMISqB3HZlTTCK+Op5fpJjpyKa38MVloH92Mk+XZXkiKwFBCfQjJa+mJLOU3P0GnyyV5Uk2YQkISqAXKWlK8lBlOUvXJiyVJdCJoHRXDrCckpWUbENW3loKLy2FA20OSkBKSsn2l2V1kuOTSWnCEhCUgJRkw7KcpfjspLqasFSWgKAEDqmKmEvJbmbl1YTl8lL4yAPSgcMGpSsoYWhRMouYSMkeleViKfzIhCVwwKC0CWBoKfnlcTWRkj0qy6ul8KOITyflUUSIS0BQAlKSdbNyeSk8QlwCghKQkmxRlhF3x6WyBAQlICXZKi4XZXksKwFBCUhJNovLRVkeZxOWgKAEpCRblOXtm3iUJSAoASnJ2lm5fBOPpXBAUML+PPDc1iQl6XhZWgpv/5fG3MRA4/NFUMLBwjFH5IizqKq7qrKM9CzKdFdW7i40F2+7kZI0VZb3Pc/Sa3j2aXFc3w7HacSXx9W0if/E8ud7IzR91mz+ReVP/vLf2AoIxxsn17Oo6uv/zxxxHtUf1G/Po7r9rzyN8q8Xz59GeeMsUER6FmXRdFzWEbO0eNtNLSVpXBExjrh65NAnk+Iof9iBx9nMVpNH8e0haJriq+P6djjm5o705c/3RmhefdY3vhX73BGU0Ew45og68llU9T0D9LMoi0jp/tBsJC4/pGTEVyf1YkpJSrLzuMwfdtejiE8uiiOR0Ug4Rnx1clc4Hu64Xv6sb4bm5ecuNBGUDLcjHw3HfPMEcG84rnsN5XJobhmXUhJxKRwP/rnfF5r2AQQlvU3Jq448azQc1z7Gto5LKYm4FI72AQQl7LUjFyP+26jexvwP6rdXTbnrcGw8LpOURFgIxy7vA8pSUEJXO3J5SvJtzN9edmRu4bH3YFyWkcZRzpOUpCdxeWPnb09nCMfd7QOLHeBYVgpK6ERK3ujI5SnJ3JXj8FZcHhXlp+On42IUpYd40Ie4XHZfaB6EcNz1DnBswlJQQps7Mh5c2s7dPSYv//colUdp9OnJ06MoU0rjVBqI6XdoHmowEY77+bgthQtKaFdKdmtpe9uBOJUppaMoPz15epxGshLoR1keR4yy56j3KCj/6Nf/5jjbDnQmJRdTkv+qm0vbW5blcRrJSqAfZXkc8ZsmLPsUlP/0zf/1s0lxoinpTkr2eEpSVgKDysrFhKWy7IHRJNkIdC8lh/kNqI6Y5GqWq8/ez2Ul0PkBLUVETCP++KS+Kkt3hXc1KG0CpKSsBGhJWVoKF5QgJWUlwFZlObs+YaksuxWUztS0MCXPpKSsBIaZlXFzKTxZCu9EULLzw+PONzGEL15SUlYCPF6W+TjiNy+SCUtBOehwnEb82Ume3vWvHF0eISvq34EkJWUlwKNlOYv445Ocls6bylJQdl4VMV8nHB94E8P08ghZ0X0Bmjr4hFgpKSsB1srK5fPm1VK4B6S3Iyhz5BzZOfye3XeW4nbuTSP+fM1wfPQIWdF9AXoU8ZM7QzO38Qvc1dtuvo/5v85SUlYCbFiWx5env3ae74YUlDywVJ3iz4/zNDUQjo0fSLdD80/uDM0cP5mko1u/26FWCpZnJaWkrATY8oQ4uzz9Lc53x7JSUB4wIlsYjo2FZno8NPcTl1JSVgLs7vS3ON8dy0pBecCI7FA47iI0dx2XUlJWAuznfDeTlYJSRB4qNO+Ly2WbhaaUlJUAslJQishBx+WydUNTSspKAFkpKEWkuLxm9dDMETlimqWkrASQlYJSRLJ+aOYck1xN6/lXs/OLen4mJbuWlT89efa0ODLaArKS/gflVUeKyLaF5lmefj45m+b5NFdZSnYwKz+/yD89eWaqEpCV9DkoF6+omVx2pIhsUeLnapLnX1ycnddTn0h3P8fzevrZ+zemKoHhZKUX7TQTlDmi/S/KWZ6S/NXxh71BtbSqQr64OJvk+SxXPpfOj7amKoEhZeVfmYTZygaCsv0RGZcdaUqyjZ+Ricn+fklYTFW6WQfod1b+6UnIyr4F5Z0RGa6PbHFKfnlxbmKyt0Ote8ABWUmHgvLGiraIbP/hZ41bVgL0OCuP8p7eSywom0zJiRXt7hxy1rhlpawEep+VKeLIhGX7g9JNNh090kxMykpZCQwhKyNiasKynUHpJptOH10mJrkzKz1dCOh3WZqwbEVQusmmNynp5hvuzEpPFwKGkJVxfcJSVu4pKBePH3eTjZSk9zuJB6EDgyrLG/eDD/Ch6PmBoMzR2JPN64hZYUVbSjKkEdZUJTDgrDzKMa57PluZl379s6jurMpRU9t3liKnmEX8+UlM3WQjJRnYnuNB6MAws/Iox08uYhyR+rUOfiMic+SIOIvqX8f5WVRNBuVVREZ86MhZRJaSUpLBDq/uAQeGmZWnkXKMI35yEUddzspHIzJHPou7C2G07ra7HZGhI7t/SHgeELISYOOsjBTTiD897d6E5boR+dA1lCJyyIeB5wEhKwGaKssbE5atLcvcRETeDsr8WEQmEdnLXd/EJLISoPGsvJqwvCzL3J6l8PxDRy4i8uws6s0i8mZQTlLc+BVFZO93dxOTHCQrPV0IGGRZpqMcP7nIB5ywXJ6SfPuhIz805cYReS0oL4r44iSl63+HiOx9Srr5hoNkpacLAcMsy1mKPz1NVxOW44jYV1zenpJ8G9VVRzb03MirGcrkE5eSsPOd0IPQgSFn5dWE5WIi70ZcNv6Y9Hz/lGRu+hcc+YylJOx1SDVVCSjLxescr8flX7nIR5cluOXM5SIlzy9TchdTkoJSSsLh98zlB6EfRZlSUpbAwOPy8+txudmy+PKs5P+xlJJ5x7+LoJSScKBh9PJmnZTSUZRuAwfE5cNxuexGaN6452afKSkopSS0IisjxzTmV08XMmEJGBvvjMtly6FZ55jlD9dH7j8lBaWUhHaVpQlLgAfictlFxOQkRcQ0V5N6/tXsfFLPY2f33AhKKQkdy8obE5ayEuDO8/5F5FmuvpicT/N8mqtFROYD/UiCsvP7U855GpWUpH9l6S073RqIVv9XXNIAWx5xiymkaVQ555ac+kcX9dwBb38CWclmgbj4QjuNavX/xOKShqNbT9xz3oFHD8/WvjN59EcXr9c64H3jbMNAb0qSIWelu3Z2Go7rBuIGX2gXlzSklB447/iI4fYB2+Z3Jt87Q3nfAe8b58E70pQkA89Kd+00EpH3heMehperi2UfOO+IS1g+ZFo7MflDUK57wPvGeZBvJDoSwmOGGo3IFo4ny+cdcQnRhYnJx4PSN842nAAsbcMDA86NCcuBjy2rLGF36EupuMQo163nt4zaMCgsczJYPgGYkoRVhpdBBce61z72YBgRl0jJ9hu1YVBYNqjQ7NBSFAiOFo4VPQtHnzWGsu4+VXrUhkHh+pfsnl+LKSJBcBgr9vNZK0ukZP+DcpvQdGIAmorLZQcZT3p27WOrPmtPA0BKDjconRiAfY4hy9Z9/m4jBr6EvdPP2tMAaP++2v7nAfUtKHd9YlhroBngRfHQ17i8fgiv9/zdRhgfdv1B334agLKkDTtnV54H1Oeg3MWJYa0AFY4wqNCkHx+rpXDas0/2ZmKyP0HZ1IlhrQAVjkAdMavma8VnihiXIwXTkrK0FM5hxo1+TUz2PyjNTAA7DcdJXX317rtJXa3+Vx0X5SdPXh4XpdBsw4DvTZ4cJCX7+r4SQQmwSTjmiFk1X+uUMK3mn519kx4MTXG5/3mE5QlLWcmOdrb+rXELSoA7IrLBcHyoYKr5w6EpLg9VlosJS1lJ84NMT9e4BSUgIu+IyAbDcZvQFJeykj7tVL2fmBSUgIg8ZESKS1lJz8ecYUxMCkpARHYhbsSlrKSbKdnXm28EJTCsjuxoRIpLWUmn95nhrHELSqDPKXlx2ZE9iMiN41JZykoOMP4MbI1bUAI97MirKcmLuuprR64el4uyPClKWSkr2c/uMdiJSUEJ9CQlhzAluW5cLsryxISlrGQPo9CwJyYFJdCTlBzalOTqZTm7PmGpLGUlu0jJod18IygBKTnErAxL4bKSHXz61rgFJSAlB12WlsJlJVsNRNa4BSUgJZWlpXBZycYftIlJQQlISX7IyrAULitZaywyMSkoASnJo2VpKVxW8kBKuvlGUAJSksfLcmbCUlZy63O0xi0oASnJ2lkZ1ycsZaWsHO5wZI1bUAJSki3LciYrZeWAPzITk4ISkJLISlnJpiOSiUlBCUhJdp2V7tqRlf1OSTffCEpASrLzrHTXjqyUkghK4PBj9/l88sW5lOxqVobHDMlKKYmgBA45dlfzi7r64vy78/nEwN31svTGHVkpJRGUwL6HbxOTvczK8MYdWSklEZTAPoZvE5NDKktL4bKy1d9sPQ9IUAIdTUk33wyqLC2Fy8qWDkeeByQoASlJt7IyLIX3JStzc39VOtzGNDEpKAEpSR/K0lJ4y7My3/0D1GfzWZUbqMoypWejcRHFPkPTxKSgBKQkvSrL20vhi5IQl3vOyrXC8aya/sF3f3ZWTbf/LZ6VR3/95W8+K48eDs3U0Bab5SrnPI3KzTf7kf6HX/1TWwGQkuxNETEuR4tuEJebbL1UrpKVjYRjlfPZfFZH3cRPXjwbjcuUHgjN7eNy+SbuaVQ5ZykpKIFu1KTnAdFsXCrLtbLyKEZHRZGu11eD4bjrayiXQ3PjuDQlKSiBDqek5wGxi7h0E8/qxlEWKX5z/HScyvaE48ahuUFcmpIUlEC3a9LEJDstSzfxPPxdbtF/07r66v2bXEeZOhCODcZliiIiT+t6Gh5RLiiBzp7MTEyyn6x0E8/tiJzU1VfvvpvU1aIOr/55t8Jxy7h8Wo7nuf6z2XmdYxaV40VQAt1LSTffcJCyjAHEZX1PIN6OyKEdfbfjssqRivjk9MWRm7pawGODgFXPc9a4OdS+t3ieZSw9LP1GXN4oj/aHxSrhuGyYEXljCyxUUX8/n1x91v9vNXdTl6AEunE6t8ZNy+NyWatCUzjuNC7zXfuDm7oEJdDG87eJSdofl8vWDc2dEo773x+8mUlQAu0anU1MMoTQ3CnheKgdYGbCUlACLUlJN98whNCk3x/38oSlrBSUgJQE2LAsZ7JSUAJSEkBWCkpASgK0LivdtdNYUE6q+XEpK0FKSklgcFnprp3GgvLfnb/+raevTjQlDG9I9TwgYOBZGR4z1FRQuuUNBjiMeh4QwHJZmrDcNihtAhja0GliEuDOrAyPGRKUwKPDpYlJgFXK0v3gghK4NyXdfAMgKwUlICUBZKWgBKQkQGez8qdPXz4dHWtKQQlSEoANs/JPz7776VNTlYKyvwGR1/lXPGerx7vBREoC7GykPZ9PTFUKyn6G4yIgJnW1+l91fPkEV6HZmx3j4nI3yBFSEmB3Q66pSkHZz3DcICCml09wFZo92E9MSQLsfwS+mqp0s46g7H84PvwFS2j2oCNNSQIcajR2D7igbEVE7iEc9xma4nI/O4+lbQBZKShF5A8R2aEguC80382mF9U8pRQRR0X56enLo7KIiBTpqCxT3E7Qu/4Rq+0/lrYBZKWgFJEdiMhZVcXKt4vPq+rtu3fPnzwZlWVEpBTn08kiGMdp9NMnL8a3lsjLlE5H46IoxOW6HWlKEkBWCkoR2YGInFfVt2dn82rlu8Vz1HX1fjpbhOFyHaZIn5f/X3GrGJ+Mj/7ab/zkyfhIXD66I1naBuhBVg7k6UKCUkQuRWSOWVWt+1dV9/wr0/kdS+Rns+n//tWflCmJywf2JUvbAL3JyoE8XUhQishNInIVd66cV3V9Pp08HJdFRDkq04eyTEe9PgLv3JdMSQL0ZpAfyIPQBeUm534R2Uho3heXRVl8/Ox5OUoRcVSOfuvpR0eLazT7Epc9uEkLgNXH/CFMVQrKNQqgK9e0tTAi14rLFHE+uby5pyzPX0zGo7LrcSkiAQYeEv1+ELqgXCkC2n9NW4ci8tG4zBHTyx97Nq+++ubbR+Py6i9p1bMwRSQAyyeFHt8DLigf78jWTkn2ICJXqcyH4zJFGhXlVVIe5I0+q7zxSEQC0OOsFJR3lEGbl7aHEJFrxWVZlh89ezYelYtnYU7WfHVkI1r4xiMAZKWgPExHtnlpe9GRA4zIx+NyXv16/mY0Kj969mxUlpHuvrv8vldHNvXDCEcAhpyVoyF/ip14XMusqubzy44cdkQ+sIlmVfXr+ZtIMSp/KMtxWd44aG0rAGSloNxJREYrZ5iuTUnOKx250haLmM2vl+WoXM5KAJCVgnLbjmz/TRI3l7ZNSW5XlstL4coSAFkpKDdPyU48P9LS9i426aNL4QAgKwXlQx3ZoedHWtre7Ra2FA6ArBSUm3WkKUnuK0tL4QDISkF5d0p26NWIH1LSlOSBtv/NpXATlgDIysEGZYeWtqVkCz+LuDFhKSsBkJUDCcquPD9SSnaoLBcTlrISAFnZ56Ds0PMjb8eKe25kJQD0OytHbd5SHY3Iq0Bxz03ns9JdOwDIys4FZdcjMkxJ9isr3bUDwC46YQ0rzGvczsrjokwR+yzLwwdlDyIyvOGmr8e8xwwB0Fw4/tAJq4fa1Ys5HgvNRVZOq/lnZ9+kiOP9TlgeJij7EZFXe4yl7d4PCiYsAWggHNfvhKsXc6wemh/6qpp/9vab47L89PTlUVmkSEe7LMvdBuVyOC7rekSGpe1hDhkeMwTAUkQ2GI6PnoA2CM1pVOcpzqeTSHFUjn7r6UdHZZkiLf53KUGbCMocManmO9riy+F4fTt3MiLD0jbuBwcQkVcRedAMWCU0r2JxXJbnLybjUTlOo58+eTEuPpy5ypROR+OiuGPucq3QTP/Jv/27R+Uo7eZX7W443vmxWdrmhnFZykoAEdl+KWJclpFiMUNZXObik/HRX/uNnzwZH9348zdC89FQTP/xv/279phHdyZL28hKABHZD8t1WBTF6WhcppvFuByaq8SloFyhI01JIisBRGRP3RmIy6H5QFwKyof2KkvbyEoAETlw6bG4FJT37liWtpGVAEM53YvI7eJy2ciOZWmbXexX7gQHaNvIbAVyY1ePgKzq+nw6uf0HRnYsOxayEqDHQ7EVyB3F5aCD0o6FrAQY1unezNHujYazV0XYsZCVAP0fb61ACspdRmS48JaWZWVZRgplCdDUed8KpKDcwf4kIml3Vka6fOmqCUuALQZVU5KC0v7EgL9MX7501YQlwFanflOSgrKBs7Ipbjq+D9+csFSWAFJSUO4uHG9wkw19GhzjcsLSUjiAlBSUzUfktWsil+lIel2WlsIBpGQ3gnJWVa06Ubk7G66OBUvhAFKyG0H56+/efDhR3dDQeevOper7iEi44wiyFA5ISSnZ8qB8P5kuTlQ3/x9XMyJbuHep+j4iElYoS0vhgJSkXUF5daK6+UFezohsRSDCDgZZS+Ed/laQ1/kXfKxISRXRoaB8aOwDWpsmlsI7FYhrr9g8sFIkNJGSdCgogW6VpaXwfYbjHi7puW+lSGgiJRGUwK6G4zuWwkXG7sJxL5f0rHVJktBESiIogcb6Yzk4xGUnwnF/oWkfQEoiKIF1g2PIcdmDcGw8NMUlUhJBCYjLVSPSG7Z8wUBKIiiBA4XFso5EhjdsiUukJIISaFFYXBsgDhSa3rAlLpGSCEqgw2Fx7R+uG5pN8IYtcYmURFACww3NZgjE9selskRKIiiBHYUmA4lLb2ZCSiIoAdgqLr2ZCSmJoASggXTwZiakJIISgAYyItzEIyWlJIISgKbKMtzEIyURlACwi7h0E0/fPt98+XgvKYmgBGA/cekmnt58mh+mJKvK470QlAAcoEXuuIlHWXblW8HSlOS8qrKNgqCEtRS7enj3IdXhdMDh0sRS+D1SRGrTgJMjz6t6VlWv376tqpxznuc655wirf5TGm0EJWjEGJXFx+MnZVH0JipzRFXX38zezava+YCWlGWPl8JXb8QyFS9Hx0Uq2vPDV1X17buzqPLH5WmUHwYQow2CEtW4XiOmSB8fn/6tn/32x8enqS/zlDnyN5P3/8vnf/jN5H1+bOxe/XzgNMA2ZdnRpfBHY3H1RiwiXoxOfv7xf/BidNKeoqxzVHWVNz24jTZDk17+s//JVmAg1bhWI6aIsig+Hj8ZlduN8DlycyNg2npNbF7V38zeVXWdV/jBHz0fPHoaMPqzlnFZtmop/L5qfDQW123EIhUvR8fl1jOUa4829//xlLb9Ir2f0cYgIyhh39W4QSOuvj5+36C2+pDaVOA++jOvPv4++sM/cBow+rNlWe5/KfxGPt5XjSvG4lqNuMqFifmxXqxy/d18UudVl5hzRL5rGrIro40vtP0Myjyv1vvgUqSRq7B5ZHjaRTVuc5/NutW41qLPo0fMo9Oru/jdHx2RV//djf5skJW7Wwp/OB8frsZVYnGtm1cercZHY7GOeDO/+P1vPnszv6hX+M/kyFVdzebVt2/Pq7pqarTZxQB732jjC223g/LOcMzzavL6LM/XeCRVGpXHr57d0ZRCUz5e5mMPqnGDy9If8OgFoBtssUZuY19xixn9aaYs11kKX3HN+s58fKAaN4vFR/PxvmpcMRbrXH83n1T3ROfVf2he1TnneV2/fvt2Nq/mdY5bV0puMNrsdFi+b0zY/gutQWbnQbleOOZYqyavmvL23iU05WNXhqfVq7HBAevRX3n1OV2jPx0tyweWwrdZs76dj01V44r5+HA1PhyLV8fRA4fH8uMkq6rKOR5+ouS6o03nvtBaM2k4KF/8o//xzppsMByFpnzcJh+bfRLkw33TkmrcUXT2dfQ36A/uvBUxKsuUYlyWr54/Hxfl4p8el6OX45Ny0zXrHU06rpWPD1Tjw7H4sN294Wbji5Q6OuAbbR46MI//3n9/x467l3BsPjTFpXzcbjTp/RfWno3+Bv3hDjIpRkXx4+Onx+VokYHjYvTvv/r4v/qN/7BDa9a383GbaryzI/f/0u2Nv9BaM+l+UP7P/92h/tt1QwfOVWiKS/koRw4++vtM2fcgk1JEFBFH5fjluEtr1s3m49V80Lyuco6qat1Ltxu/aN6aSbuC8q/+g799kP/wvK6/fvd2XtfNJqa4lI8Ofp+7z32YO1sb8nH7Neu6quezed70bFhV1bdvzz80ZV1Fu8991kx6FZS/+PX/vfhsUtrf++XqnL9+f/b3//BffP3+7CoiG09McWmmSkZITPuGHWmf+bj6pON94TibzP7yy7+YTWYb/xrzulo8rzyX3bv3wJmo20GZIkZF+eMnz8qiuJpnTk08Jf8BN/Jx14kpLn0vRGLaf+wk9324VV1/N59UUS9+gAbzcd1wzDnPZ/O6iQeNRb9ucjXatD0o/+o/+NtFSj8+ffbf/PZ/+uPTZ8VlRI6K4sdPno+K6x9Do4l5Iw03Tsx1W3OAcenKFQz69jE7wAM7wFU+5hRlUaZIVdRvZh8Sc5vZx/2E4zBD02jTrqBc3JRzIx87lJj3/eEVE/OOuOx+WfbscY9O7QqjzYP+wHfI/ny4uX4zn1S5HpXFq+eXZ7oUo5WfoH5fRB42HIcWmhJzD+57M2Ia/53/9s403Dgxm23NhxNz+Y9tv2J+VZPHr56lcZk6dS1z14+fpaCUjyrETmu0OdjZ+uohlxFRXr3y8VZIjYoypZ5EZL9D0xfaZsPxgTcj/hCUjxbhKol53x/eXWKuNZ254op5GpVp3K4Jy4Fc8igfJeaWg36ze3jj0+pt3sNXrMbejDYrfgSLVz7e+LzLHB89e1oU5Xza54hsJjTNYnbqC+1VRG7wgpuHgnLdxFz+Y51fMU+pGJURkcbF+OXzKNPujorBvt5KNdLgoN/yo+DR0X8/x8X21TjY0Wb5RDt7fVbmFGmgEblWaHbiXoWhfaG98Z+4EZExr2KjF9ysF5SPJuZa05ktXzG/Ksu6iK/fn1VFjF8+T6OiGBXx4L6yvBNs/OblDaYBWr4ry0d2Ouh395BZvTV3NNpsUI2NbLoVq/GAo83dszWtfJNc9+Lyxi7Y8VnMrnyhvT7aVF+/O5vN5tPXb/PscuptXt2492w5ih4Os22DcuPpzA1WzBtpzRVXzK+35vnf/z//xdfvzlJZxLg8/uhp3HOZ9o3RbYNYvOvPNL93PjraunqMLiZmg6N/S4LpodZpbrTpykbYz2gjIvcTlzf+YddnMbf5QruLA+2+4+uH/Tznr9+f/b0//JffvHs7n89jhTR6OMx2G5TrJubyH9u4NbepzxVbM43L+4f4/PXk/f/6+R9+M3kfER8fn/7XP/vtH68fi9vsZ+vG4p2/hUse6Vlr7mJybhfH6aOH5+5Gmw1OZhuPNm27JEBEtic0O/Q4v+2/0B48Br5+fza//7Wcy4u3EfFAmB0gKFevvc1ac/W/Z+3hZumhtOnBOYN5rr+Zvls8+bZMxcdHT0bFI68gSpGaurR3g1h8dOZDNdLLxNymNbc5HzzeiasdaDliXnd1tGnJd9RFR4rIbsTljf24F6+UXGu0SUuHeWOHwIOv+MyRq7r++t3ZvK7irjfgtCsoG2zNO/+GteqzmY8nIkbF8uC9txdabhOLhxrQoYutudn5YBejzfKR3rnR5oCDTJ5XeXbZkSKyC3F54x/25pWS10eb0zKVt/9cPa8iRxHx0fGTv/Xv/UcfHz8t9jnI5A9fGh99R3d7g3KD1tymPhvb+8vy6KNnqSwjRXE5ab+3D14swp5PAxvUZw90dLS5NiU5q3Sk0GyXeX3ncx9nr9/mKkekUYqPj5+UqWjnjz/q4p60+uu8p1X1F2dv9rubp+LsdURKZRq/ep7G5aN3hTe8ccQiHOKAmlbVX1ZnNk4b8/fG0rYpyR58pbnrE8yz6mL2Zo3QvPc8vl6A3vfmmHV/o0ef+ziP+NV01toPZdT73W71+mxoN8/19MNX9vnsu7Y9IB0QWIPKDkvbQvO+0Ly3J9cJ0AfeHLPmj77S/rnvpBGULRrL5h/24z69Kxyg7VVhaZvHQvPeP7xWgPqiIij3vB9f7aBdeVc4QIc70pQk+wpQBOUhy9JSOECDo6ulbRCUgxz75iYsAbb+lm5pGwSloTBuTFjKSoC1OtKUJAhKrgbHxYSlrAR4ZLS0tA2CElkJsMHwaGkbBCVbZKW7doCBD4mmJEFQsmVWumsHGHpKmpIEQcmW42l4zBAgJQFBSTPDqzfuAFISEJRsP9SGN+4AvRzc3HMDgpIDlqWlcKDTo5l7bkBQ0oKx+PZSeIS4BNr+rdiUJAhKWjc0Ly2FR4jLwZ2YG2A/Yc8daUoSBCVtLst741Ix9C4cfzgxb9+Ty19CBCg72IEtbYOgpA9x6SaeHoZjcyfm5S8hWwWo0OTW/mxpGwQl/YlLN/EIxxW/hGwToEKTsLQNgpLej/Ju4hGOOw3QlULT/tbvQcbSNghKhpI4buIRjocLTftbX/d/S9sgKBluWTrZC8e27G/L7Hud60hTkiAoQVwKx4Pvb9d60heb1n+ClrYBQcl2cXntzN/tk71wbM/+du0f+mLT4uPF0jYgKGkgLq/1ZEdCUzj28IuNuNzvsWNpGxCUNHmCv/YPDxSaa70hRjiKS7aNSMcLICjpQGiu+V9c7w0xToSDissdfIEZVEeKSEBQ0tXQXPOvdpLj3ri89wuMuHxwS7rJBhCUdD40YddfYMTl3RvNTTaAoARYMTSHvET+yE1ppiQBQQmwTVxe68kezWLefWPNtT+hIwFBCdBEXF77hx1fInd3NiAoAVoUmistkd9nxwH6+HNVRSQgKAFaG5cr9WQTj8d64KeyhA0ISoAOx+VKf7iRx2Pd+7cLR0BQAghQgH4pbAIAAAQlAACCEgAAQQkAgKAEAABBCQCAoAQAQFACACAoAQBAUAIAICgBABCUAAAISgAAEJQAAAhKAAAEJQAAghIAAAQlAACCEgAAQQkAgKAEAEBQAgCAoAQAQFACACAoAQAQlAAAICgBABCUAAAISgAA+uz/B7KC44YyB5X/AAAAAElFTkSuQmCC', likes: 3, liked: false, t: now() - 420000, seed: true },
@@ -713,7 +863,7 @@
   var myBusId = uid();
   function sendBus(msg) { if (bus) { msg._from = myBusId; try { bus.postMessage(msg); } catch (e) { } } }
   function helloBus() {
-    sendBus({ t: 'hello', peer: { id: myBusId, name: me.name } });
+    sendBus({ t: 'hello', peer: { id: myBusId, uid: myId, name: me.name } });
   }
   if (bus) bus.onmessage = function (ev) {
     var m = ev.data;
@@ -721,7 +871,7 @@
     switch (m.t) {
       case 'hello':
         peers[m.peer.id] = m.peer;
-        sendBus({ t: 'hi', peer: { id: myBusId, name: me.name } });
+        sendBus({ t: 'hi', peer: { id: myBusId, uid: myId, name: me.name } });
         updateOnline(); break;
       case 'hi':
         peers[m.peer.id] = m.peer; updateOnline(); break;
@@ -729,12 +879,53 @@
         delete peers[m.peer.id]; updateOnline(); break;
       case 'msg':
         msgs.push(m.msg); if (msgs.length > MAX_MSGS) msgs = msgs.slice(-MAX_MSGS);
-        saveJSON(K_MSGS, msgs); renderChat(false); break;
+        saveJSON(K_MSGS, msgs);
+        if (chatTarget === 'all' && curPage === 'chat') renderChat(false);
+        else { unread.all = (unread.all || 0) + 1; saveUnread(); renderConvo(); toast('📨 大厅有新消息'); }
+        break;
       case 'typing':
         if (m.on) typingMap[m.name] = now() + 2500; else delete typingMap[m.name];
         renderTyping(); break;
       case 'posts':
         posts = loadJSON(K_POSTS, []); renderSquare(); break;
+      case 'fp':
+        posts = loadJSON(K_POSTS, []);
+        if (isFriend(m.by)) toast(m.name + ' 发布了新动态');
+        renderSquare(); renderConvo(); break;
+      case 'freq':
+        if (m.toBus !== myBusId || m.from.id === myId) return;
+        if (isFriend(m.from.id)) { sendBus({ t: 'fok', from: { id: myId, name: me.name }, to: m.from.id }); return; }
+        freqFrom = m.from;
+        $('freqAva').textContent = m.from.name.charAt(0).toUpperCase();
+        $('freqAva').style.background = colorOf(m.from.name);
+        $('freqName').textContent = m.from.name;
+        openModal('modalFreq'); break;
+      case 'fok':
+        if (m.to !== myId || isFriend(m.from.id)) return;
+        friends.push({ id: m.from.id, name: m.from.name, since: now() }); saveFriends();
+        renderConvo(); renderMe(); updateDots();
+        toast('🎉 ' + m.from.name + ' 已和你成为好友'); break;
+      case 'fno':
+        if (m.to !== myId) return;
+        toast(m.from.name + ' 暂未接受好友请求'); break;
+      case 'fr':
+        if (m.to !== myId || m.msg.from.id === myId) return;
+        if (!isFriend(m.msg.from.id)) return;
+        var fid = m.msg.from.id;
+        dm[fid] = dm[fid] || [];
+        dm[fid].push(m.msg); if (dm[fid].length > MAX_MSGS) dm[fid] = dm[fid].slice(-MAX_MSGS);
+        saveDm();
+        if (chatTarget && chatTarget.id === fid && curPage === 'chat') { renderChat(false); }
+        else {
+          unread[fid] = (unread[fid] || 0) + 1; saveUnread();
+          renderConvo(); updateDots();
+          toast('📨 来自 ' + m.msg.from.name + ' 的新消息');
+        }
+        break;
+      case 'fr-typing':
+        if (m.to !== myId) return;
+        if (chatTarget && chatTarget.id === m.from) { if (m.on) typingMap['f:' + m.from] = now() + 2500; else delete typingMap['f:' + m.from]; renderTyping(); }
+        break;
     }
   };
   window.addEventListener('pagehide', function () { sendBus({ t: 'bye' }); });
@@ -742,7 +933,140 @@
   function updateOnline() {
     var n = 1 + Object.keys(peers).length;
     $('sideOnline').textContent = '在线 ' + n + ' 人';
-    renderChat(false);
+    renderConvo();
+  }
+
+  /* ================= 好友系统：会话列表与房间 ================= */
+  function renderConvo() {
+    var html = '';
+    var last = msgs.length ? msgs[msgs.length - 1] : null;
+    var sub = last ? ((last.from.name === me.name ? '我：' : last.from.name + '：') + (last.type === 'image' ? '[图片]' : last.type === 'file' ? '[文件] ' + last.fname : last.text)) : '文字、图片与文件';
+    html += '<div class="convo-row" data-room="all">'
+      + '<div class="convo-ava hall">☁️</div>'
+      + '<div class="convo-main"><div class="convo-name">余安大厅</div><div class="convo-sub">' + esc(sub) + '</div></div>'
+      + '<div class="convo-side"><span class="convo-time">' + (last ? fmtTime(last.t) : '') + '</span>'
+      + (unread.all ? '<span class="dot-unread">' + unread.all + '</span>' : '') + '</div></div>';
+    friends.forEach(function (f) {
+      var arr = dm[f.id] || [];
+      var fl = arr.length ? arr[arr.length - 1] : null;
+      var online = peerOnline(f.id);
+      var fsub = fl ? ((fl.from.id === myId ? '我：' : '') + (fl.type === 'image' ? '[图片]' : fl.type === 'file' ? '[文件] ' + fl.fname : fl.text)) : (online ? '在线，打个招呼吧' : '成为好友，开始聊天吧');
+      html += '<div class="convo-row" data-room="' + esc(f.id) + '">'
+        + '<div class="convo-ava" style="background:' + colorOf(f.name) + '">' + esc(f.name.charAt(0).toUpperCase()) + '</div>'
+        + '<div class="convo-main"><div class="convo-name">' + esc(f.name) + (online ? '<span class="on-dot"></span>' : '') + '</div><div class="convo-sub">' + esc(fsub) + '</div></div>'
+        + '<div class="convo-side"><span class="convo-time">' + (fl ? fmtTime(fl.t) : '') + '</span>'
+        + (unread[f.id] ? '<span class="dot-unread">' + unread[f.id] + '</span>' : '') + '</div></div>';
+    });
+    if (!friends.length) html += '<div class="picker-empty" style="margin-top:14px">还没有好友<br>点右上角 ＋ 添加，即可私聊、传文件、互看广场</div>';
+    $('convoRows').innerHTML = html;
+    $('convoRows').querySelectorAll('.convo-row').forEach(function (row) {
+      row.onclick = function () {
+        if (row.dataset.room === 'all') enterRoom('all');
+        else { var f = friendById(row.dataset.room); if (f) enterRoom(f); }
+      };
+    });
+    updateDots();
+  }
+  function enterRoom(target) {
+    chatTarget = target;
+    $('convoList').classList.add('hidden');
+    $('chatRoom').classList.remove('hidden');
+    if (target === 'all') {
+      $('chatTitle').innerHTML = '余安大厅';
+      $('btnSeeSquare').classList.add('hidden');
+      inputEl.placeholder = '说点什么…';
+      unread.all = 0; saveUnread();
+    } else {
+      $('chatTitle').innerHTML = esc(target.name) + (peerOnline(target.id) ? '<span class="ch-sub">在线</span>' : '<span class="ch-sub">离线</span>');
+      $('btnSeeSquare').classList.remove('hidden');
+      inputEl.placeholder = '给 ' + target.name + ' 发消息…';
+      unread[target.id] = 0; saveUnread();
+    }
+    renderChat(); scrollChat(true);
+    try { inputEl.focus(); } catch (e) { }
+  }
+  function exitRoom() {
+    chatTarget = null;
+    $('convoList').classList.remove('hidden');
+    $('chatRoom').classList.add('hidden');
+    renderConvo();
+  }
+  $('btnBackConvo').onclick = exitRoom;
+  $('btnSeeSquare').onclick = function () { if (chatTarget && chatTarget.id) openFriendSquare(chatTarget.id); };
+
+  /* ---- 添加好友 ---- */
+  function openAddFriend() {
+    openModal('modalAddFriend');
+    renderPeers();
+  }
+  function renderPeers() {
+    var seen = {}, list = [];
+    for (var k in peers) {
+      var p = peers[k];
+      if (!p || !p.uid || p.uid === myId || seen[p.uid] || isFriend(p.uid)) continue;
+      seen[p.uid] = 1; list.push(p);
+    }
+    if (!list.length) {
+      $('peerList').innerHTML = '<div class="picker-empty">暂时没有可添加的在线用户<br>在同一浏览器再开一个标签页（用不同身份进入）试试</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (p) {
+      html += '<div class="peer-row">'
+        + '<div class="peer-ava" style="background:' + colorOf(p.name) + '">' + esc(p.name.charAt(0).toUpperCase()) + '</div>'
+        + '<div class="peer-name">' + esc(p.name) + (p.uid && p.uid.indexOf('c:') === 0 ? ' <span class="badge-cloud">云端</span>' : '') + '</div>'
+        + '<button class="peer-add" data-uid="' + esc(p.uid) + '" data-bus="' + esc(p.id) + '" data-name="' + esc(p.name) + '">加好友</button></div>';
+    });
+    $('peerList').innerHTML = html;
+    $('peerList').querySelectorAll('.peer-add').forEach(function (b) {
+      b.onclick = function () {
+        sendBus({ t: 'freq', toBus: b.dataset.bus, from: { id: myId, name: me.name } });
+        b.textContent = '已发送'; b.disabled = true; b.style.opacity = .55;
+        toast('好友请求已发送，等待对方确认…');
+      };
+    });
+  }
+  $('btnAddFriend').onclick = openAddFriend;
+
+  /* ---- 好友请求确认 ---- */
+  $('btnFreqYes').onclick = function () {
+    if (freqFrom && !isFriend(freqFrom.id)) {
+      friends.push({ id: freqFrom.id, name: freqFrom.name, since: now() }); saveFriends();
+      sendBus({ t: 'fok', from: { id: myId, name: me.name }, to: freqFrom.id });
+      renderConvo(); renderMe();
+      toast('🎉 已和 ' + freqFrom.name + ' 成为好友');
+    }
+    closeModal('modalFreq');
+  };
+  $('btnFreqNo').onclick = function () {
+    if (freqFrom) sendBus({ t: 'fno', from: { id: myId, name: me.name }, to: freqFrom.id });
+    closeModal('modalFreq');
+    toast('已拒绝好友请求');
+  };
+
+  /* ---- TA 的广场 ---- */
+  function openFriendSquare(fid) {
+    var f = friendById(fid);
+    if (!f) { toast('仅好友的广场可查看'); return; }
+    $('fsName').textContent = f.name;
+    var list = posts.filter(function (p) { return (p.author && p.author.id) === fid; }).sort(function (a, b) { return b.t - a.t; });
+    var html = '';
+    if (!list.length) html = '<div class="picker-empty">TA 还没有发布动态</div>';
+    list.forEach(function (p) {
+      html += '<div class="post">'
+        + '<div class="post-head">' + avatarHTML(p.author.name, 30)
+        + '<div class="meta"><div class="pname">' + esc(p.author.name) + (p.type === 'diary' ? ' <span class="badge-src">来自碎碎念</span>' : '') + '</div>'
+        + '<div class="ptime">' + fmtAgo(p.t) + '</div></div></div>'
+        + '<div class="post-body">' + esc(p.text).replace(/\n/g, '<br>') + '</div>';
+      if (p.img) html += '<img class="post-img" src="' + p.img + '" alt="">';
+      if (p.type === 'diary' && p.diary) html += '<div class="diary-card"><div class="dc-head"><span class="dc-mood">' + esc(p.diary.mood || '🌤') + '</span><b>' + esc(p.diary.title || '无标题') + '</b><span class="dc-date">' + esc(p.diary.date || '') + '</span></div><div class="dc-body">' + esc(p.diary.content || '').replace(/\n/g, '<br>') + '</div></div>';
+      html += '</div>';
+    });
+    $('fsFeed').innerHTML = html;
+    $('fsFeed').querySelectorAll('.post-img').forEach(function (img) {
+      img.onclick = function () { openViewer(img.src, '广场配图'); };
+    });
+    openModal('modalFSquare');
   }
 
   /* ================= 页面切换 ================= */
@@ -786,23 +1110,32 @@
   function renderChat(scroll) {
     var kw = ($('searchInput').value || '').trim().toLowerCase();
     var html = '';
-    var shown = kw ? msgs.filter(function (m) { return (m.text || '').toLowerCase().indexOf(kw) >= 0; }) : msgs;
+    var dataSrc = (chatTarget && chatTarget.id) ? (dm[chatTarget.id] || []) : msgs;
+    var shown = kw ? dataSrc.filter(function (m) { return ((m.text || '') + (m.fname || '')).toLowerCase().indexOf(kw) >= 0; }) : dataSrc;
     if (kw) { $('filterInfoChat').textContent = '筛选「' + kw + '」· ' + shown.length + ' 条结果'; $('filterBarChat').classList.add('on'); }
     else $('filterBarChat').classList.remove('on');
-    html += '<div class="online-strip"><span>☁️ 在线 ' + (1 + Object.keys(peers).length) + ' 人 · 多开标签页即可互聊</span></div>';
+    if (!chatTarget || chatTarget === 'all') html += '<div class="online-strip"><span>☁️ 在线 ' + (1 + Object.keys(peers).length) + ' 人 · 多开标签页即可互聊</span></div>';
+    else if (peerOnline(chatTarget.id)) html += '<div class="online-strip"><span>🟢 ' + esc(chatTarget.name) + ' 在线</span></div>';
     var prevDay = '', prevFrom = null, prevT = 0;
     shown.forEach(function (m) {
       var dk = dayKey(m.t);
       if (dk !== prevDay) html += '<div class="day-sep"><span>' + dayLabel(m.t) + '</span></div>';
-      var own = m.from.name === me.name;
+      var own = m.from.id ? m.from.id === myId : m.from.name === me.name;
       var compact = dk === prevDay && m.from.name === prevFrom && m.t - prevT < 300000;
+      var body = '';
+      if (m.type === 'image') body = '<img class="msgimg" src="' + m.img + '" alt="图片" data-view="1">';
+      else if (m.type === 'file') {
+        body = '<div class="file-card' + (own ? ' own' : '') + '">'
+          + '<div class="fc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>'
+          + '<div class="fc-main"><div class="fc-name">' + esc(m.fname || '文件') + '</div>'
+          + '<div class="fc-size">' + fmtSize(m.size || 0) + '</div></div>'
+          + '<a class="fc-dl" href="' + m.data + '" download="' + esc(m.fname || '文件') + '" title="下载"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></a></div>';
+      } else body = esc(m.text);
       html += '<div class="row' + (own ? ' own' : '') + (compact ? ' compact' : '') + '">'
         + (compact ? '<div class="ph"></div>' : '') + avatarHTML(m.from.name, 32)
         + '<div class="col">'
         + (!compact && !own ? '<span class="uname">' + esc(m.from.name) + '</span>' : '')
-        + '<div class="bubble">' + (m.type === 'image'
-          ? '<img class="msgimg" src="' + m.img + '" alt="图片" data-view="1">'
-          : esc(m.text)) + '</div>'
+        + '<div class="bubble">' + body + '</div>'
         + '<span class="utime">' + fmtTime(m.t) + '</span></div></div>';
       prevDay = dk; prevFrom = m.from.name; prevT = m.t;
     });
@@ -830,7 +1163,7 @@
   inputEl.addEventListener('input', function () {
     var has = inputEl.value.trim().length > 0;
     $('btnSend').disabled = !has;
-    if (has && !typingSent) { typingSent = true; sendBus({ t: 'typing', name: me.name, on: true }); }
+    if (has && !typingSent) { typingSent = true; if (chatTarget && chatTarget.id) sendBus({ t: 'fr-typing', to: chatTarget.id, from: myId, on: true }); else sendBus({ t: 'typing', name: me.name, on: true }); }
     clearTimeout(typingOffTimer);
     typingOffTimer = setTimeout(function () { typingSent = false; sendBus({ t: 'typing', name: me.name, on: false }); }, 1800);
     inputEl.style.height = 'auto';
@@ -840,17 +1173,28 @@
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendText(); }
   });
   function pushMsg(msg) {
-    msgs.push(msg); if (msgs.length > MAX_MSGS) msgs = msgs.slice(-MAX_MSGS);
-    saveJSON(K_MSGS, msgs);
-    sendBus({ t: 'msg', msg: msg });
+    msg.from = { id: myId, name: me.name };
+    if (chatTarget && chatTarget.id) {
+      var fid = chatTarget.id;
+      dm[fid] = dm[fid] || [];
+      dm[fid].push(msg); if (dm[fid].length > MAX_MSGS) dm[fid] = dm[fid].slice(-MAX_MSGS);
+      saveDm();
+      sendBus({ t: 'fr', to: fid, msg: msg });
+    } else {
+      msgs.push(msg); if (msgs.length > MAX_MSGS) msgs = msgs.slice(-MAX_MSGS);
+      saveJSON(K_MSGS, msgs);
+      sendBus({ t: 'msg', msg: msg });
+    }
     renderChat();
   }
   function sendText() {
     var text = inputEl.value.trim();
     if (!text) return;
-    pushMsg({ id: uid(), from: { name: me.name }, type: 'text', text: text, t: now() });
+    pushMsg({ id: uid(), type: 'text', text: text, t: now() });
     inputEl.value = ''; inputEl.style.height = 'auto'; $('btnSend').disabled = true;
-    typingSent = false; sendBus({ t: 'typing', name: me.name, on: false });
+    typingSent = false;
+    if (chatTarget && chatTarget.id) sendBus({ t: 'fr-typing', to: chatTarget.id, from: myId, on: false });
+    else sendBus({ t: 'typing', name: me.name, on: false });
   }
   $('btnSend').onclick = sendText;
 
@@ -876,6 +1220,21 @@
     });
   }
   $('btnImg').onclick = function () { $('fileInput').click(); };
+  $('btnFile').onclick = function () { $('dmFileInput').click(); };
+  $('dmFileInput').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    if (f.size > MAX_FILE) { toast('文件需在 2MB 以内'); return; }
+    if (/^image\//.test(f.type)) { toast('图片请点左侧图片按钮发送'); return; }
+    var r = new FileReader();
+    r.onload = function () {
+      pushMsg({ id: uid(), type: 'file', fname: f.name, size: f.size, data: r.result, text: '', t: now() });
+      toast('文件已发送 📎', true);
+    };
+    r.onerror = function () { toast('文件读取失败'); };
+    r.readAsDataURL(f);
+  });
   $('fileInput').addEventListener('change', function () {
     var f = this.files && this.files[0];
     this.value = '';
@@ -883,7 +1242,7 @@
     if (!/^image\//.test(f.type)) { toast('演示版暂只支持图片消息'); return; }
     if (f.size > 8 * 1024 * 1024) { toast('图片太大啦，请选择 8MB 以内的图片'); return; }
     compressImage(f).then(function (dataUrl) {
-      pushMsg({ id: uid(), from: { name: me.name }, type: 'image', img: dataUrl, text: f.name || '图片', t: now() });
+      pushMsg({ id: uid(), type: 'image', img: dataUrl, text: f.name || '图片', t: now() });
     }).catch(function () { toast('图片读取失败，请重试'); });
   });
 
@@ -901,7 +1260,7 @@
   /* ================= 广场页 ================= */
   function renderSquare() {
     var kw = ($('searchInput').value || '').trim().toLowerCase();
-    var list = posts.slice().sort(function (a, b) { return b.t - a.t; });
+    var list = posts.slice().filter(canSeePost).sort(function (a, b) { return b.t - a.t; });
     if (kw) {
       list = list.filter(function (p) {
         if ((p.text || '').toLowerCase().indexOf(kw) >= 0) return true;
@@ -912,11 +1271,15 @@
     }
     $('filterBarSq').classList.toggle('on', !!kw);
     var html = '';
-    if (list.length === 0) html = '<div class="square-empty">还没有内容<br>点右下角 ＋ 发布第一条动态吧</div>';
+    if (list.length === 0) html = '<div class="square-empty">这里只有你和好友的动态～<br>点右下角 ＋ 发布第一条，或先去「消息」添加好友</div>';
     list.forEach(function (p) {
+      var aid = (p.author && p.author.id) || 'sys';
+      var isMine = aid === myId, isSys = aid === 'sys';
+      var nameCls = (!isMine && !isSys) ? ' class="pname-link" data-fsq="' + esc(aid) + '" title="查看 TA 的广场"' : '';
       html += '<div class="post" data-pid="' + p.id + '">'
         + '<div class="post-head">' + avatarHTML(p.author.name, 36)
-        + '<div class="meta"><div class="pname">' + esc(p.author.name)
+        + '<div class="meta"><div class="pname"><span' + nameCls + '>' + esc(p.author.name) + '</span>'
+        + (isMine ? ' <span class="badge-friend">我</span>' : (!isSys ? ' <span class="badge-friend">好友</span>' : ''))
         + (p.author.cloud ? ' <span class="badge-cloud">云端</span>' : '')
         + (p.seed ? ' <span class="badge-seed">示例</span>' : '') + '</div>'
         + '<div class="ptime">' + fmtAgo(p.t) + '</div></div>'
@@ -950,11 +1313,14 @@
         posts.forEach(function (p) {
           if (p.id === pid) { p.liked = !p.liked; p.likes = (p.likes || 0) + (p.liked ? 1 : -1); }
         });
-        saveJSON(K_POSTS, posts); sendBus({ t: 'posts' }); renderSquare();
+        saveJSON(K_POSTS, posts); sendBus({ t: 'fp', by: myId, name: me.name }); renderSquare();
       };
     });
     $('squareScroll').querySelectorAll('.diary-more').forEach(function (a) {
       a.onclick = function () { a.closest('.diary-card').classList.toggle('open'); a.textContent = a.closest('.diary-card').classList.contains('open') ? '收起' : '展开全文'; };
+    });
+    $('squareScroll').querySelectorAll('.pname-link').forEach(function (el) {
+      el.onclick = function () { openFriendSquare(el.dataset.fsq); };
     });
   }
 
@@ -979,7 +1345,7 @@
     var text = $('composeText').value.trim();
     if (!text && !composeImg) { toast('写点什么，或添加一张图片'); return; }
     posts.unshift({
-      id: uid(), author: { name: me.name, cloud: !!me.cloud }, type: composeImg ? 'image' : 'text',
+      id: uid(), author: { id: myId, name: me.name, cloud: !!me.cloud }, type: composeImg ? 'image' : 'text',
       text: text, img: composeImg, likes: 0, liked: false, t: now()
     });
     if (posts.length > MAX_POSTS) posts = posts.slice(0, MAX_POSTS);
@@ -1024,7 +1390,7 @@
   $('btnShareDiary').onclick = function () {
     if (!selectedDiary) return;
     posts.unshift({
-      id: uid(), author: { name: me.name, cloud: true }, type: 'diary', text: '',
+      id: uid(), author: { id: myId, name: me.name, cloud: true }, type: 'diary', text: '',
       diary: {
         mood: selectedDiary.mood, date: selectedDiary.date, title: selectedDiary.title,
         content: selectedDiary.content, collectionName: selectedDiary.collectionName || ''
@@ -1045,11 +1411,13 @@
       + '<div><div class="me-name">' + esc(me.name) + (cloud ? ' <span class="badge-cloud">云端账号</span>' : ' <span class="badge-seed">游客</span>') + '</div>'
       + '<div class="me-sub">' + (cloud ? '碎碎念互通 · ' + maskPhone(cloud.phone) : '本地昵称 · 数据仅存于当前浏览器') + '</div></div></div>'
       + '<div class="me-stats"><div class="me-stat"><b>' + msgs.length + '</b><span>消息</span></div>'
-      + '<div class="me-stat"><b>' + posts.filter(function (p) { return p.author.name === me.name; }).length + '</b><span>我的动态</span></div>'
+      + '<div class="me-stat"><b>' + friends.length + '</b><span>好友</span></div>'
+      + '<div class="me-stat"><b>' + posts.filter(function (p) { return (p.author.id || 'sys') === myId; }).length + '</b><span>我的动态</span></div>'
       + '<div class="me-stat"><b>' + (1 + Object.keys(peers).length) + '</b><span>在线</span></div></div>'
       + '<div class="name-edit"><input id="renameInput" maxlength="20" placeholder="修改显示昵称" value="' + esc(me.name) + '"><button id="renameBtn">保存</button></div>'
       + '</div>'
       + '<div class="me-card">'
+      + '<div class="me-row" id="meFriends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>我的好友<span class="hint">' + friends.length + ' 位 · 私聊 / 传文件 / 互看广场</span></div>'
       + '<div class="me-row" id="meShareDiary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>分享碎碎念日记到广场<span class="hint">' + (cloud ? '已连接云端' : '需云端登录') + '</span></div>'
       + '<div class="me-row" onclick="window.open(\'https://shimucheng12-art.github.io/life/\',\'_blank\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>打开碎碎念网页版<span class="arrow">→</span></div>'
       + '<div class="me-row" id="meSettings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>设置<span class="arrow">→</span></div>'
@@ -1067,6 +1435,7 @@
       $('topAvatar').textContent = v.trim().charAt(0).toUpperCase();
       toast('昵称已更新', true);
     };
+    $('meFriends').onclick = function () { switchPage('chat'); exitRoom(); openAddFriend(); };
     $('meShareDiary').onclick = function () {
       if (!getCloudAuth()) { toast('请先退出并以碎碎念云端账号登录'); return; }
       $('btnFromDiary').click();
