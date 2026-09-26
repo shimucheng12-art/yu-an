@@ -37,6 +37,18 @@
 - 登录后可拉取云端日记分享到广场
 - 不登录也可以游客身份直接体验
 
+## 📱 Android APK
+
+把余安装进手机：仓库提供 Android 壳工程（`android/`，WebView 封装线上版），APK 托管在 [Releases](https://github.com/shimucheng12-art/yu-an/releases)。
+
+- **[⬇️ 下载 yu-an-v3.1.apk](https://github.com/shimucheng12-art/yu-an/releases/latest/download/yu-an-v3.1.apk)**（约 70 KB）
+- 安装：手机上直接打开 APK，允许「安装未知应用」即可，无需 USB 与开发者模式
+- 打开即用；首次启动需联网，断网时显示轻量离线页（恢复后一键重连）
+- 私聊文件（≤2MB）可保存到系统「下载」目录；选择图片/文件发消息均正常可用
+- 仅申请网络权限；APK 数据保存在应用自身存储，与浏览器版相互独立
+- 说明：好友互聊依赖「同一浏览器多标签页」的本地机制，APK 单窗口内暂无法演示；云端账号（碎碎念登录 / 日记分享）与完整界面不受影响
+- 自行构建：`android/build.sh`（需 JDK 17 + Android SDK build-tools 34 / platform 34）
+
 ## 🎨 设计
 
 - 背景：雾蓝粉调云层摄影 + 莫兰迪配色 + 毛玻璃（backdrop-filter）卡片
@@ -52,6 +64,7 @@
 ├── 团队公约.md        # 示例素材
 ├── 晨光山谷.png       # 示例素材（广场示例动态）
 ├── .github/          # GitHub Pages 自动部署工作流
+├── android/          # Android APK 壳工程（WebView 封装线上版）
 ├── src/              # 完整版源码（Next.js + Socket.io + SQLite）
 └── mini-services/    # Socket.io 实时服务
 ```

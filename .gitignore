@@ -26,3 +26,10 @@ server.log
 Thumbs.db
 .idea/
 .vscode/
+
+# Android 构建产物与签名密钥
+android/build/
+*.apk
+yu-an.keystore
+android/yu-an.keystore
+*.apk.idsig
