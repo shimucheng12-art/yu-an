@@ -23,10 +23,12 @@ echo "[2/7] 链接资源与清单…"
 "$BT/aapt2" link -o "$OUT/base.apk" -I "$PLAT" --manifest AndroidManifest.xml \
   --min-sdk-version 24 --target-sdk-version 34 \
   --version-code "$VER_CODE" --version-name "$VER_NAME" \
+  --java "$OUT/gen" \
   -A assets "$OUT/res.zip"
 
 echo "[3/7] 编译 Java…"
 javac -source 1.8 -target 1.8 -bootclasspath "$PLAT" -d "$OUT/classes" \
+  $(find "$OUT/gen" -name 'R.java') \
   src/io/github/shimucheng12art/yuan/MainActivity.java
 
 echo "[4/7] 转 DEX…"
