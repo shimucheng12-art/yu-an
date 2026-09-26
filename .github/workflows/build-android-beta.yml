@@ -20,11 +20,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK components
-        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+      # ubuntu-latest 已预装 Android SDK（ANDROID_HOME），直接装组件并接受许可
+      # （android-actions/setup-android@v3 的 sdkmanager --update 会因旧 tools 包下架而失败）
+      - name: Set up Android SDK components
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Build Beta APK
         run: |
