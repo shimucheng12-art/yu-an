@@ -13,6 +13,7 @@ export interface MessageUser {
 
 export interface ChatMessage {
   id: string
+  seq: number
   type: 'text' | 'file'
   content: string | null
   fileName: string | null
@@ -24,7 +25,6 @@ export interface ChatMessage {
 }
 
 export interface OnlineUser {
-  socketId: string
   userId: string
   username: string
   color: string

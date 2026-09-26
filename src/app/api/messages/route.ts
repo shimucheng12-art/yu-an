@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const MESSAGE_SELECT = {
   id: true,
+  seq: true,
   type: true,
   content: true,
   fileName: true,

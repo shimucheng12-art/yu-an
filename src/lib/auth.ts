@@ -1,8 +1,13 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
 import { db } from '@/lib/db'
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-fallback-secret-do-not-use-in-prod'
+// JWT 密钥：优先用环境变量；未配置时从 DATABASE_URL 派生。
+// 派生方式不降低安全性（能读到 DATABASE_URL 的人本身就有整库访问权），
+// 好处是部署时只需要配置一个环境变量。
+const JWT_SECRET =
+  process.env.JWT_SECRET ??
+  createHash('sha256').update(`yuan-beta-jwt-v1:${process.env.DATABASE_URL ?? ''}`).digest('hex')
 const secretKey = new TextEncoder().encode(JWT_SECRET)
 
 export interface SafeUser {

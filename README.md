@@ -102,21 +102,31 @@
 
 好友请求不是依赖 localStorage，也不要求双方同时在线；好友窗口打开时会自动刷新云端状态。
 
-### 无需自建服务器
+### 无需自建服务器（Vercel + Neon，全程免绑卡）
 
-仓库附带 `render.yaml`，可以使用 Render 托管 Next.js 服务和 PostgreSQL。部署后 Android APK 的 `android/res/values/strings.xml` 中的 `home_url` 指向云端地址即可。
+云端方案：**Vercel**（Next.js 托管，Hobby 计划免费、GitHub 登录即可）+ **Neon**（免费 0.5GB PostgreSQL）。
 
-> 当前环境没有你的 Render/Vercel 云端账号授权，因此这里不能替你创建第三方云服务账号或替你生成生产数据库。代码已经按托管部署方式准备好。
+实时消息采用轮询（`/api/sync`，3 秒间隔），因此单服务即可运行，无需长连接进程。
+文件与图片直接存数据库（serverless 平台文件系统只读），图片上传前会在客户端压缩。
 
-### 本地/云端部署
+部署步骤：
+
+1. 在 [neon.tech](https://neon.tech) 用 GitHub 登录并创建项目，复制 Connection string；
+2. 在 [vercel.com](https://vercel.com) 用 GitHub 登录 → Add New Project → 导入本仓库；
+3. 环境变量只需一个：`DATABASE_URL`（粘贴 Neon 连接串；`JWT_SECRET` 未配置时将从
+   `DATABASE_URL` 派生，见 `src/lib/auth.ts`）；
+4. Deploy。首次部署前先对 Neon 执行 `npx prisma db push` 建表。
+
+> 仓库不再附带 `render.yaml`（Render 已要求免费账户绑卡）；历史上版本可从 git 记录找回。
+
+### 本地部署
 
 环境变量见 `.env.example`：
 
-- `DATABASE_URL`
-- `JWT_SECRET`
-- `INTERNAL_SECRET`
+- `DATABASE_URL`（必填，PostgreSQL，推荐 Neon）
+- `JWT_SECRET`（可选，未配置时自动派生）
 
-数据库为 PostgreSQL。首次部署后执行：
+数据库建表：
 
 ```bash
 npx prisma db push
@@ -134,7 +144,7 @@ npm run start
 Android 壳默认地址：
 
 ```text
-https://yuan-beta.onrender.com/
+https://yu-an.vercel.app/
 ```
 
 如果你的云端服务使用其他域名，只需修改：

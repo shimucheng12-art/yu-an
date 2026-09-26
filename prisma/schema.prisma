@@ -15,6 +15,9 @@ model User {
   avatarColor  String    @default("#10b981")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  // 轮询模式在线状态：每次心跳刷新；typingUntil 表示“正在输入”到何时过期
+  lastSeen     DateTime?
+  typingUntil  DateTime?
   messages     Message[]
   sentRequests FriendRequest[] @relation("FriendRequestSender")
   receivedRequests FriendRequest[] @relation("FriendRequestReceiver")
@@ -54,12 +57,16 @@ model Friendship {
 
 model Message {
   id        String   @id @default(cuid())
+  // 自增序号：客户端轮询的增量游标（比 createdAt 更严格单调）
+  seq       Int      @unique @default(autoincrement())
   type      String   @default("text")
   content   String?
   fileName  String?
   fileType  String?
   fileSize  Int?
   isImage   Boolean  @default(false)
+  // 文件二进制直接存库（serverless 文件系统只读，不能落盘）
+  fileData  Bytes?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

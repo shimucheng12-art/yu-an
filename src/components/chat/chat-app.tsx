@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowDown, Cloud, Loader2, LogOut, MessageCircle, Paperclip, Send, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import { ApiError, api, downloadBlob, getToken } from '@/lib/api-client'
-import { getSocket } from '@/lib/socket'
+import { ApiError, api, downloadBlob } from '@/lib/api-client'
+import { compressImageIfNeeded } from '@/lib/compress'
 import { dateLabel } from '@/lib/format'
 import type { AuthUser, ChatMessage, OnlineUser, SystemNotice } from '@/types/chat'
 import { cn } from '@/lib/utils'
@@ -21,7 +21,16 @@ interface Props {
   onLogout: () => void
 }
 
-const MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+// Vercel 等 serverless 平台请求体上限约 4.5MB，图片已在上传前客户端压缩
+const MAX_UPLOAD_SIZE = 4 * 1024 * 1024
+// 轮询同步间隔（毫秒）：3 秒内新消息可见，足够日常聊天
+const POLL_INTERVAL = 3000
+
+interface SyncResponse {
+  messages: ChatMessage[]
+  online: OnlineUser[]
+  typing: { userId: string; username: string }[]
+}
 
 type ListItem =
   | { kind: 'message'; key: string; message: ChatMessage; compact: boolean; showDate: boolean; dateText: string }
@@ -50,6 +59,14 @@ export function ChatApp({ user, onLogout }: Props) {
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onLogoutRef = useRef(onLogout)
   onLogoutRef.current = onLogout
+  // 轮询游标：目前已收到的最大消息序号（只由轮询结果推进，
+  // 自己发消息不推进，避免跳过他人未同步的序号）
+  const lastSeqRef = useRef(0)
+  // 当前是否正在输入（随轮询请求上报给服务端）
+  const isTypingRef = useRef(false)
+  // 上一轮在线名单（id -> username），用于生成加入/离开通知
+  const prevOnlineRef = useRef<Map<string, string>>(new Map())
+  const firstSyncRef = useRef(true)
 
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -71,6 +88,7 @@ export function ChatApp({ user, onLogout }: Props) {
         if (cancelled) return
         setMessages(data.messages)
         setHasMore(data.hasMore)
+        lastSeqRef.current = data.messages.length > 0 ? data.messages[data.messages.length - 1].seq : 0
         setInitialLoading(false)
         scrollToBottom('auto')
       })
@@ -88,68 +106,76 @@ export function ChatApp({ user, onLogout }: Props) {
     }
   }, [scrollToBottom])
 
-  /** 实时事件订阅 */
+  /** 轮询同步：增量消息 + 在线状态 + 输入提示（serverless 部署方案） */
   useEffect(() => {
-    const socket = getSocket()
-    const token = getToken()
+    let cancelled = false
 
-    const emitJoin = () => {
-      if (token) socket.emit('join', { token })
-    }
-    const onConnect = () => {
-      setConnected(true)
-      emitJoin()
-    }
-    const onDisconnect = () => setConnected(false)
-    const onPresence = ({ users }: { users: OnlineUser[] }) => setOnlineUsers(users)
-    const onNotice = ({ kind, username }: { kind: 'join' | 'leave'; username: string }) => {
+    const pushNotice = (kind: 'join' | 'leave', username: string) => {
       setNotices((prev) => [
         ...prev.slice(-49),
         { id: `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, username, at: Date.now() },
       ])
     }
-    const onNewMessage = (message: ChatMessage) => {
-      appendMessage(message)
-      if (nearBottomRef.current) {
-        scrollToBottom('smooth')
-      } else {
-        setNewCount((c) => c + 1)
-        setShowScrollBtn(true)
+
+    const poll = async () => {
+      try {
+        const data = await api<SyncResponse>(
+          `/api/sync?after=${lastSeqRef.current}&typing=${isTypingRef.current ? 1 : 0}`
+        )
+        if (cancelled) return
+        setConnected(true)
+
+        if (data.messages.length > 0) {
+          const lastSeq = data.messages[data.messages.length - 1].seq
+          if (lastSeq > lastSeqRef.current) lastSeqRef.current = lastSeq
+          for (const message of data.messages) appendMessage(message)
+          if (nearBottomRef.current) {
+            scrollToBottom('smooth')
+          } else {
+            setNewCount((c) => c + data.messages.length)
+            setShowScrollBtn(true)
+          }
+        }
+
+        setOnlineUsers(data.online)
+
+        // 在线/输入状态直接以服务端返回为准（成员无变化时保持引用稳定，避免多余渲染）
+        const typingMap: Record<string, { username: string; at: number }> = {}
+        for (const t of data.typing) typingMap[t.userId] = { username: t.username, at: Date.now() }
+        setTypingUsers((prev) => {
+          const sameKeys =
+            Object.keys(prev).sort().join(',') === Object.keys(typingMap).sort().join(',')
+          return sameKeys ? prev : typingMap
+        })
+
+        // 对比上一轮名单，生成加入/离开通知（首轮只记录基线不提示）
+        const current = new Map(data.online.map((u) => [u.userId, u.username]))
+        if (!firstSyncRef.current) {
+          for (const [id, username] of prevOnlineRef.current) {
+            if (!current.has(id)) pushNotice('leave', username)
+          }
+          for (const [id, username] of current) {
+            if (!prevOnlineRef.current.has(id)) pushNotice('join', username)
+          }
+        }
+        prevOnlineRef.current = current
+        firstSyncRef.current = false
+      } catch (err) {
+        if (cancelled) return
+        setConnected(false)
+        if (err instanceof ApiError && err.status === 401) onLogoutRef.current()
       }
     }
-    const onTyping = ({ userId, username, isTyping }: { userId: string; username: string; isTyping: boolean }) => {
-      setTypingUsers((prev) => {
-        const next = { ...prev }
-        if (isTyping) next[userId] = { username, at: Date.now() }
-        else delete next[userId]
-        return next
-      })
-    }
-    const onAuthError = () => {
-      toast.error('登录已失效，请重新登录')
-      onLogoutRef.current()
-    }
 
-    if (socket.connected) {
-      setConnected(true)
-      emitJoin()
-    }
-    socket.on('connect', onConnect)
-    socket.on('disconnect', onDisconnect)
-    socket.on('presence', onPresence)
-    socket.on('chat-notice', onNotice)
-    socket.on('new-message', onNewMessage)
-    socket.on('user-typing', onTyping)
-    socket.on('auth-error', onAuthError)
+    // 页面隐藏时暂停轮询（省流量），恢复可见后最多 3 秒内自动续上
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') void poll()
+    }, POLL_INTERVAL)
+    void poll()
 
     return () => {
-      socket.off('connect', onConnect)
-      socket.off('disconnect', onDisconnect)
-      socket.off('presence', onPresence)
-      socket.off('chat-notice', onNotice)
-      socket.off('new-message', onNewMessage)
-      socket.off('user-typing', onTyping)
-      socket.off('auth-error', onAuthError)
+      cancelled = true
+      clearInterval(id)
     }
   }, [appendMessage, scrollToBottom])
 
@@ -161,7 +187,8 @@ export function ChatApp({ user, onLogout }: Props) {
         const next: typeof prev = {}
         let changed = false
         for (const [id, info] of Object.entries(prev)) {
-          if (now - info.at < 3000) next[id] = info
+          // 轮询周期 3 秒 + 服务端有效期 6 秒，5 秒的清理窗口保证不闪烁
+          if (now - info.at < 5000) next[id] = info
           else changed = true
         }
         return changed ? next : prev
@@ -273,14 +300,16 @@ export function ChatApp({ user, onLogout }: Props) {
 
   const handleInputChange = useCallback((value: string) => {
     setInput(value)
-    const socket = getSocket()
     if (value.trim()) {
-      socket.emit('typing', { isTyping: true })
+      // 输入状态经下一次轮询上报给服务端（typing=1）
+      isTypingRef.current = true
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-      typingTimerRef.current = setTimeout(() => socket.emit('typing', { isTyping: false }), 1500)
+      typingTimerRef.current = setTimeout(() => {
+        isTypingRef.current = false
+      }, 1500)
     } else {
+      isTypingRef.current = false
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-      socket.emit('typing', { isTyping: false })
     }
   }, [])
 
@@ -296,11 +325,11 @@ export function ChatApp({ user, onLogout }: Props) {
 
   const handleFileSelected = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      e.target.value = ''
+      // 图片会先压缩（最长边 1600px / JPEG），大幅节省流量与数据库空间
+      const file = await compressImageIfNeeded(e)
       if (!file) return
       if (file.size > MAX_UPLOAD_SIZE) {
-        toast.error('文件大小不能超过 20MB')
+        toast.error('文件大小不能超过 4MB（图片会自动压缩）')
         return
       }
       setUploading(file.name)
@@ -334,7 +363,7 @@ export function ChatApp({ user, onLogout }: Props) {
   const onlineList = (
     <div className="space-y-1">
       {onlineUsers.map((u) => (
-        <div key={u.socketId} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
+        <div key={u.userId} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
           <div className="relative">
             <UserAvatar user={{ username: u.username, avatarColor: u.color }} className="h-8 w-8 text-sm" />
             <span
@@ -368,7 +397,7 @@ export function ChatApp({ user, onLogout }: Props) {
           role="status"
         >
           <span className={cn('h-1.5 w-1.5 rounded-full', connected ? 'bg-emerald-500' : 'animate-pulse bg-amber-500')} aria-hidden="true" />
-          {connected ? '实时连接' : '连接中…'}
+          {connected ? '已连接' : '连接中…'}
         </span>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
@@ -535,7 +564,7 @@ export function ChatApp({ user, onLogout }: Props) {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={!!uploading}
                 aria-label="发送文件"
-                title="发送文件（不超过 20MB）"
+                title="发送文件（图片自动压缩，单文件不超过 4MB）"
               >
                 <Paperclip className="h-4 w-4" aria-hidden="true" />
               </Button>

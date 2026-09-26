@@ -1,5 +1,3 @@
-import { mkdir, writeFile } from 'node:fs/promises'
-import path from 'node:path'
 import type { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
@@ -8,11 +6,12 @@ import { broadcastEvent } from '@/lib/socket-admin'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
-const UPLOAD_DIR = path.join(process.cwd(), 'db', 'uploads')
+// Vercel serverless 请求体上限约 4.5MB，客户端会先把图片压缩到该限内
+const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB
 
 const MESSAGE_SELECT = {
   id: true,
+  seq: true,
   type: true,
   content: true,
   fileName: true,
@@ -52,33 +51,37 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: '文件不能为空' }, { status: 400 })
   }
   if (file.size > MAX_FILE_SIZE) {
-    return Response.json({ error: '文件大小不能超过 20MB' }, { status: 413 })
+    return Response.json({ error: '文件大小不能超过 4MB（图片会自动压缩后上传）' }, { status: 413 })
   }
 
   const displayName = sanitizeFileName(file.name || 'unnamed')
   const mimeType = file.type || 'application/octet-stream'
   const isImage = mimeType.startsWith('image/')
 
-  // 先建消息记录拿到唯一 id，再以 <id>.bin 落盘，路径完全不可控 => 无穿越风险
-  const message = await db.message.create({
-    data: {
-      type: 'file',
-      fileName: displayName,
-      fileType: mimeType,
-      fileSize: file.size,
-      isImage,
-      userId: user.id,
-    },
-    select: MESSAGE_SELECT,
-  })
-
+  // 文件二进制直接存数据库（serverless 平台文件系统只读，不能落盘）
+  let fileData: Buffer
   try {
-    await mkdir(UPLOAD_DIR, { recursive: true })
-    const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(path.join(UPLOAD_DIR, `${message.id}.bin`), buffer)
-  } catch (err) {
-    await db.message.delete({ where: { id: message.id } }).catch(() => {})
-    console.error('[upload] save file failed:', err)
+    fileData = Buffer.from(await file.arrayBuffer())
+  } catch {
+    return Response.json({ error: '文件读取失败，请重试' }, { status: 500 })
+  }
+
+  const message = await db.message
+    .create({
+      data: {
+        type: 'file',
+        fileName: displayName,
+        fileType: mimeType,
+        fileSize: file.size,
+        isImage,
+        fileData,
+        userId: user.id,
+      },
+      select: MESSAGE_SELECT,
+    })
+    .catch(() => null)
+
+  if (!message) {
     return Response.json({ error: '文件保存失败，请重试' }, { status: 500 })
   }
 

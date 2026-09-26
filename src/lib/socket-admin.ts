@@ -4,7 +4,7 @@ import { io, type Socket } from 'socket.io-client'
  * 服务端内部广播通道：Next.js API 持久化消息后，
  * 通过 socket.io 客户端把消息推给聊天服务（端口 3003），再由其广播给所有在线客户端。
  */
-const CHAT_SERVICE_URL = process.env.CHAT_SERVICE_URL ?? 'http://localhost:3003'
+const CHAT_SERVICE_URL = process.env.CHAT_SERVICE_URL
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? 'dev-internal-secret'
 
 let socketPromise: Promise<Socket> | null = null
@@ -13,7 +13,8 @@ function ensureAdminSocket(): Promise<Socket> {
   if (socketPromise) return socketPromise
 
   socketPromise = new Promise<Socket>((resolve, reject) => {
-    const socket = io(CHAT_SERVICE_URL, {
+    // CHAT_SERVICE_URL 未配置（如 Vercel serverless 部署）时不会走到这里
+    const socket = io(CHAT_SERVICE_URL!, {
       path: '/',
       transports: ['websocket'],
       reconnection: true,
@@ -55,6 +56,9 @@ function ensureAdminSocket(): Promise<Socket> {
 
 /** 广播失败不影响消息持久化结果，仅记录日志 */
 export async function broadcastEvent(event: string, payload: unknown): Promise<void> {
+  // 未配置聊天服务（Vercel 等无长连接平台）时直接跳过，
+  // 客户端通过轮询 /api/sync 获取新消息
+  if (!CHAT_SERVICE_URL) return
   try {
     const socket = await ensureAdminSocket()
     socket.emit('internal:broadcast', { secret: INTERNAL_SECRET, event, payload })
