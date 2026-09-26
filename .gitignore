@@ -1,0 +1,28 @@
+# 依赖与构建产物
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# 数据库与上传文件（运行时生成）
+db/
+*.db
+*.db-journal
+
+# 环境变量与密钥
+.env
+.env.local
+.env.*.local
+
+# 日志
+dev.log
+server.log
+*.log
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,12 @@
+{
+  "name": "chat-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot index.ts"
+  },
+  "dependencies": {
+    "jose": "^6.0.11",
+    "socket.io": "^4.8.3"
+  }
+}

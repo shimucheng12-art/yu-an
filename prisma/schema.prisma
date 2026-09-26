@@ -1,0 +1,34 @@
+// 轻聊数据库模型：用户 + 消息（文字/文件统一存储）
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../db/custom.db"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  avatarColor  String    @default("#10b981")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  type      String   @default("text") // text | file
+  content   String? // 文字内容（type = text）
+  fileName  String? // 原始文件名（type = file）
+  fileType  String? // MIME 类型
+  fileSize  Int? // 字节
+  isImage   Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
