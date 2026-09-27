@@ -12,7 +12,7 @@ PLAT="$SDK_ROOT/platforms/android-34/android.jar"
 [ -x "$BT/aapt2" ] || { echo "找不到 aapt2（$BT）"; exit 1; }
 [ -f "$PLAT" ] || { echo "找不到 android.jar（$PLAT）"; exit 1; }
 
-VER_CODE=40; VER_NAME=4.0-beta
+VER_CODE=41; VER_NAME=4.1-beta
 OUT=build; APK="../yu-an-v$VER_NAME.apk"
 rm -rf "$OUT"; mkdir -p "$OUT/classes"
 

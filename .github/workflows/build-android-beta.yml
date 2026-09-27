@@ -29,6 +29,22 @@ jobs:
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
           "$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
+      # 签名密钥不进仓库：以 base64 存在 Actions Secrets（ANDROID_KEYSTORE_B64）
+      # 一次生成、永久复用，保证每次构建的 APK 签名一致，可覆盖安装升级
+      # 未配置密钥时直接失败，避免产出临时签名 APK（无法覆盖安装，易混淆）
+      - name: Restore signing keystore
+        run: |
+          set -e
+          if [ -n "$KS_B64" ]; then
+            printf '%s' "$KS_B64" | base64 -d > yu-an.keystore
+            echo "已恢复签名密钥"
+          else
+            echo "::error::未设置 ANDROID_KEYSTORE_B64（本地构建请运行 android/build.sh）"
+            exit 1
+          fi
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+
       - name: Build Beta APK
         run: |
           chmod +x android/build.sh

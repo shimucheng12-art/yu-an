@@ -157,10 +157,16 @@ android/res/values/strings.xml
 
 ```bash
 cd android
-./build.sh
+SDK_ROOT=<android-sdk 路径> KS=<签名密钥路径> ./build.sh
 ```
 
-产物为 `yu-an-v4.0-beta.apk`。
+产物为 `yu-an-v4.1-beta.apk`。
+
+签名说明：
+
+- APK 使用固定密钥签名（`yu-an.keystore`，密码 `yuanyuan`，密钥文件不进仓库）；
+- 之后每次更新都用同一密钥签名，新 APK 可直接覆盖安装，无需卸载；
+- 云端 Actions 构建需要把密钥 base64 后配置为 Secret `ANDROID_KEYSTORE_B64`（当前未配置时会构建失败，属预期）。
 
 ### 当前版本与旧版的区别
 
