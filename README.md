@@ -108,23 +108,23 @@
 
 实时消息采用轮询（`/api/sync`，3 秒间隔），因此单服务即可运行，无需长连接进程。
 文件与图片直接存数据库（serverless 平台文件系统只读），图片上传前会在客户端压缩。
+数据库地址已内置在 `src/lib/db.ts`（可用环境变量 `DATABASE_URL` 覆盖），**部署时无需配置任何环境变量**。
 
 部署步骤：
 
-1. 在 [neon.tech](https://neon.tech) 用 GitHub 登录并创建项目，复制 Connection string；
-2. 在 [vercel.com](https://vercel.com) 用 GitHub 登录 → Add New Project → 导入本仓库；
-3. 环境变量只需一个：`DATABASE_URL`（粘贴 Neon 连接串；`JWT_SECRET` 未配置时将从
-   `DATABASE_URL` 派生，见 `src/lib/auth.ts`）；
-4. Deploy。首次部署前先对 Neon 执行 `npx prisma db push` 建表。
+1. 在 [vercel.com](https://vercel.com) 用 GitHub 登录 → Add New Project → 导入本仓库；
+2. 直接 Deploy，无需其他配置。
 
+> 注意：线上实际域名以 Vercel 分配为准（本项目为 `yu-an2.vercel.app`），
+> 修改 `android/res/values/strings.xml` 中的 `home_url` 并重新构建 APK 即可指向。
+>
 > 仓库不再附带 `render.yaml`（Render 已要求免费账户绑卡）；历史上版本可从 git 记录找回。
 
 ### 本地部署
 
 环境变量见 `.env.example`：
 
-- `DATABASE_URL`（必填，PostgreSQL，推荐 Neon）
-- `JWT_SECRET`（可选，未配置时自动派生）
+- `DATABASE_URL`（可选，未配置时使用内置云端数据库）
 
 数据库建表：
 
@@ -139,12 +139,17 @@ npm run build
 npm run start
 ```
 
+### 云端健康检查
+
+`.github/workflows/smoke-test.yml` 可手动触发（Actions → Smoke Test → Run workflow），
+在云端注册临时账号并发送一条消息，验证线上服务与数据库连通性。
+
 ### Android Beta
 
 Android 壳默认地址：
 
 ```text
-https://yu-an.vercel.app/
+https://yu-an2.vercel.app/
 ```
 
 如果你的云端服务使用其他域名，只需修改：
