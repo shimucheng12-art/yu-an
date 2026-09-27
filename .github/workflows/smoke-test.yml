@@ -12,6 +12,26 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for Vercel deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "等待提交 $GITHUB_SHA 的 Vercel 部署完成…"
+          for i in $(seq 1 45); do
+            DEP=$(gh api "repos/shimucheng12-art/yu-an/deployments?per_page=10" \
+              --jq ".[] | select(.sha == \"$GITHUB_SHA\") | .id" | head -1 || true)
+            if [ -n "$DEP" ]; then
+              ST=$(gh api "repos/shimucheng12-art/yu-an/deployments/$DEP/statuses" --jq '.[0].state' || echo pending)
+              echo "  第${i}次检查: 部署$DEP = $ST"
+              if [ "$ST" = "success" ]; then echo "部署完成"; exit 0; fi
+              if [ "$ST" = "failure" ]; then echo "❌ Vercel 部署失败"; exit 1; fi
+            else
+              echo "  第${i}次检查: 部署尚未创建"
+            fi
+            sleep 10
+          done
+          echo "❌ 等待部署超时"; exit 1
+
       - name: Run smoke test
         run: |
           BASE="https://yu-an2.vercel.app"
