@@ -6,6 +6,22 @@ export const runtime = 'nodejs'
 const USERNAME_RE = /^[\u4e00-\u9fa5A-Za-z0-9_-]{2,20}$/
 
 export async function POST(req: Request) {
+  // 临时调试：把真实错误返回给客户端（定位云端问题后移除）
+  try {
+    return await handleRegister(req)
+  } catch (err) {
+    return Response.json(
+      {
+        error: 'REG_DEBUG',
+        detail: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? (err.stack ?? '').slice(0, 600) : undefined,
+      },
+      { status: 500 }
+    )
+  }
+}
+
+async function handleRegister(req: Request) {
   let body: { username?: unknown; password?: unknown }
   try {
     body = await req.json()
