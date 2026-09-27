@@ -4,22 +4,6 @@ import { signToken, verifyPassword } from '@/lib/auth'
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
-  // 临时调试：把真实错误返回给客户端（定位云端问题后移除）
-  try {
-    return await handleLogin(req)
-  } catch (err) {
-    return Response.json(
-      {
-        error: 'LOGIN_DEBUG',
-        detail: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? (err.stack ?? '').slice(0, 600) : undefined,
-      },
-      { status: 500 }
-    )
-  }
-}
-
-async function handleLogin(req: Request) {
   let body: { username?: unknown; password?: unknown }
   try {
     body = await req.json()
