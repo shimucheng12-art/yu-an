@@ -1,9 +1,12 @@
 name: Smoke Test
 
 # 云端健康检查：注册临时账号 → 登录 → 轮询同步 → 发消息，验证线上全链路
-# 手动触发：Actions → Smoke Test → Run workflow
+# 触发方式：修改/提交 .smoke 标记文件，或在 Actions 页面手动 Run workflow
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.smoke'
 
 jobs:
   smoke:
