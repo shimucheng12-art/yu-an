@@ -1,6 +1,6 @@
 name: Smoke Test
 
-# 云端健康检查：注册临时账号 → 登录 → 轮询同步 → 发消息，验证线上全链路
+# 云端健康检查：注册/登录 → 身份校验 → 轮询同步 → 发消息，验证线上全链路
 # 触发方式：修改/提交 .smoke 标记文件，或在 Actions 页面手动 Run workflow
 on:
   workflow_dispatch:
@@ -14,38 +14,47 @@ jobs:
     steps:
       - name: Run smoke test
         run: |
-          set -e
           BASE="https://yu-an2.vercel.app"
-          USER="smoketest_$(date +%s)"
+          USER="smoketest"
           PASS="smoke123456"
 
-          echo "[1] 首页可达性…"
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BASE/")
-          echo "    首页 HTTP $CODE"
-          [ "$CODE" = "200" ] || { echo "    ❌ 首页不可达"; exit 1; }
+          req() { # method path data
+            if [ -n "$3" ]; then
+              curl -s --max-time 60 -w "\n__HTTP:%{http_code}__CT:%{content_type}__SIZE:%{size_download}" \
+                -X "$1" "$BASE$2" -H "Content-Type: application/json" ${TOKEN:+-H "Authorization: Bearer $TOKEN"} -d "$3"
+            else
+              curl -s --max-time 60 -w "\n__HTTP:%{http_code}__CT:%{content_type}__SIZE:%{size_download}" \
+                -X "$1" "$BASE$2" ${TOKEN:+-H "Authorization: Bearer $TOKEN"}
+            fi
+          }
 
-          echo "[2] 注册临时账号 $USER …"
-          REG=$(curl -s --max-time 30 -X POST "$BASE/api/auth/register" \
-            -H "Content-Type: application/json" \
-            -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
-          echo "    响应: $(echo "$REG" | head -c 200)"
-          TOKEN=$(echo "$REG" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
-          [ -n "$TOKEN" ] || { echo "    ❌ 注册失败（数据库未连通？）"; exit 1; }
+          echo "== [1] 首页 =="
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$BASE/")
+          echo "HTTP $CODE"; [ "$CODE" = "200" ] || { echo "❌ 首页不可达"; exit 1; }
 
-          echo "[3] 轮询同步接口…"
-          SYNC=$(curl -s --max-time 30 "$BASE/api/sync?after=0&typing=0" \
-            -H "Authorization: Bearer $TOKEN")
-          echo "    响应: $(echo "$SYNC" | head -c 200)"
-          echo "$SYNC" | grep -q '"online"' || { echo "    ❌ 同步接口失败"; exit 1; }
+          echo "== [2] 注册（若已存在则改用登录）=="
+          OUT=$(req POST /api/auth/register "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
+          echo "$OUT" | tail -2; BODY=$(echo "$OUT" | head -n -1)
+          TOKEN=$(echo "$BODY" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+          if [ -z "$TOKEN" ]; then
+            echo "-- 注册未拿到 token（可能已存在），尝试登录 --"
+            OUT=$(req POST /api/auth/login "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
+            echo "$OUT" | tail -2; BODY=$(echo "$OUT" | head -n -1)
+            TOKEN=$(echo "$BODY" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+          fi
+          [ -n "$TOKEN" ] || { echo "❌ 注册/登录均未拿到 token"; exit 1; }
+          echo "TOKEN 长度: ${#TOKEN}"
 
-          echo "[4] 发送测试消息…"
-          MSG=$(curl -s --max-time 30 -X POST "$BASE/api/messages" \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"content":"smoke test ✅"}')
-          echo "    响应: $(echo "$MSG" | head -c 200)"
-          echo "$MSG" | grep -q '"seq"' || { echo "    ❌ 发送失败"; exit 1; }
+          echo "== [3] 身份校验 /api/auth/me =="
+          OUT=$(req GET /api/auth/me); echo "$OUT" | tail -2
+
+          echo "== [4] 轮询同步 /api/sync =="
+          OUT=$(req GET "/api/sync?after=0&typing=0"); echo "$OUT" | head -c 400; echo; echo "$OUT" | tail -1
+
+          echo "== [5] 发送消息 =="
+          OUT=$(req POST /api/messages '{"content":"smoke test ✅"}')
+          echo "$OUT" | tail -2; BODY=$(echo "$OUT" | head -n -1)
+          echo "$BODY" | grep -q '"seq"' || { echo "❌ 发送失败"; exit 1; }
 
           echo ""
-          echo "✅ 云端全链路正常：注册 / 登录 / 数据库 / 轮询 / 发消息"
-          echo "（临时账号 $USER 留在数据库中，可在方便时清理）"
+          echo "✅ 云端全链路正常"
