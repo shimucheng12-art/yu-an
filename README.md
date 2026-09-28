@@ -102,9 +102,13 @@
 
 好友请求不是依赖 localStorage，也不要求双方同时在线；好友窗口打开时会自动刷新云端状态。
 
-### 无需自建服务器（Vercel + Neon，全程免绑卡）
+### 无需自建服务器（EdgeOne Pages + Neon，全程免绑卡）
 
-云端方案：**Vercel**（Next.js 托管，Hobby 计划免费、GitHub 登录即可）+ **Neon**（免费 0.5GB PostgreSQL）。
+云端方案：**EdgeOne Pages**（腾讯，Next.js 全栈托管，免费版永久免费、GitHub 登录、无需绑卡，
+默认域名 `*.edgeone.app` 国内可直连）+ **Neon**（免费 0.5GB PostgreSQL）。
+
+> 历史备注：曾使用 Vercel（`*.vercel.app` 在国内被 DNS 污染，手机直连不通，故迁移）。
+> Vercel 上的旧部署与本项目共用同一数据库，海外网络仍可访问。
 
 实时消息采用轮询（`/api/sync`，3 秒间隔），因此单服务即可运行，无需长连接进程。
 文件与图片直接存数据库（serverless 平台文件系统只读），图片上传前会在客户端压缩。
@@ -112,13 +116,11 @@
 
 部署步骤：
 
-1. 在 [vercel.com](https://vercel.com) 用 GitHub 登录 → Add New Project → 导入本仓库；
-2. 直接 Deploy，无需其他配置。
-
-> 注意：线上实际域名以 Vercel 分配为准（本项目为 `yu-an2.vercel.app`），
-> 修改 `android/res/values/strings.xml` 中的 `home_url` 并重新构建 APK 即可指向。
->
-> 仓库不再附带 `render.yaml`（Render 已要求免费账户绑卡）；历史上版本可从 git 记录找回。
+1. 打开 [pages.edgeone.ai](https://pages.edgeone.ai)，用 GitHub 登录；
+2. 创建项目 → 从 GitHub 导入本仓库，框架自动识别为 Next.js；
+3. 构建命令默认 `npm run build` 即可（内含 prisma generate），直接部署；
+4. 部署完成后使用分配的默认域名（`https://<项目名>.edgeone.app`），
+   并据此更新 `android/res/values/strings.xml` 中的 `home_url` 后重新构建 APK。
 
 ### 本地部署
 
