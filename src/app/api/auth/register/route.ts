@@ -1,4 +1,5 @@
-import { db } from '@/lib/db'
+import { randomUUID } from 'node:crypto'
+import { query } from '@/lib/db'
 import { hashPassword, pickAvatarColor, signToken } from '@/lib/auth'
 
 export const runtime = 'nodejs'
@@ -26,19 +27,26 @@ export async function POST(req: Request) {
     return Response.json({ error: '密码长度需为 6-64 位' }, { status: 400 })
   }
 
-  const existing = await db.user.findUnique({ where: { username } })
-  if (existing) {
+  const existing = await query<{ id: string }>(
+    'SELECT "id" FROM "User" WHERE "username" = $1',
+    [username]
+  )
+  if (existing.length > 0) {
     return Response.json({ error: '该用户名已被注册' }, { status: 409 })
   }
 
-  const user = await db.user.create({
-    data: {
-      username,
-      passwordHash: hashPassword(password),
-      avatarColor: pickAvatarColor(),
-    },
-    select: { id: true, username: true, avatarColor: true, createdAt: true },
-  })
+  const rows = await query<{
+    id: string
+    username: string
+    avatarColor: string
+    createdAt: Date
+  }>(
+    `INSERT INTO "User" ("id", "username", "passwordHash", "avatarColor", "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, $4, now(), now())
+     RETURNING "id", "username", "avatarColor", "createdAt"`,
+    [randomUUID(), username, hashPassword(password), pickAvatarColor()]
+  )
+  const user = rows[0]
 
   const token = await signToken(user)
   return Response.json({ token, user })

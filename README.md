@@ -118,9 +118,13 @@
 
 1. 打开 [pages.edgeone.ai](https://pages.edgeone.ai)，用 GitHub 登录；
 2. 创建项目 → 从 GitHub 导入本仓库，框架自动识别为 Next.js；
-3. 构建命令默认 `npm run build` 即可（内含 prisma generate），直接部署；
+3. 构建命令默认 `npm run build` 即可，直接部署；
 4. 部署完成后使用分配的默认域名（`https://<项目名>.edgeone.app`），
    并据此更新 `android/res/values/strings.xml` 中的 `home_url` 后重新构建 APK。
+
+> 技术说明：数据层使用 `pg` 驱动直连 PostgreSQL（纯 JS、零二进制依赖），
+> 曾用 Prisma ORM，为满足托管平台函数包 128MiB 体积限制而移除；
+> 表结构见 `db/schema.sql`。
 
 ### 本地部署
 
@@ -128,10 +132,10 @@
 
 - `DATABASE_URL`（可选，未配置时使用内置云端数据库）
 
-数据库建表：
+数据库建表（参考 `db/schema.sql`）：
 
 ```bash
-npx prisma db push
+psql "$DATABASE_URL" -f db/schema.sql
 ```
 
 然后启动：

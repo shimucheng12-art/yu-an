@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { query } from '@/lib/db'
 import { signToken, verifyPassword } from '@/lib/auth'
 
 export const runtime = 'nodejs'
@@ -18,7 +18,16 @@ export async function POST(req: Request) {
     return Response.json({ error: '请输入用户名和密码' }, { status: 400 })
   }
 
-  const user = await db.user.findUnique({ where: { username } })
+  const rows = await query<{
+    id: string
+    username: string
+    passwordHash: string
+    avatarColor: string
+    createdAt: Date
+  }>('SELECT "id", "username", "passwordHash", "avatarColor", "createdAt" FROM "User" WHERE "username" = $1', [
+    username,
+  ])
+  const user = rows[0]
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return Response.json({ error: '用户名或密码错误' }, { status: 401 })
   }

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
-import { db } from '@/lib/db'
+import { randomUUID } from 'node:crypto'
+import { query } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
 import { broadcastEvent } from '@/lib/socket-admin'
 
@@ -8,19 +9,6 @@ export const dynamic = 'force-dynamic'
 
 // Vercel serverless 请求体上限约 4.5MB，客户端会先把图片压缩到该限内
 const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB
-
-const MESSAGE_SELECT = {
-  id: true,
-  seq: true,
-  type: true,
-  content: true,
-  fileName: true,
-  fileType: true,
-  fileSize: true,
-  isImage: true,
-  createdAt: true,
-  user: { select: { id: true, username: true, avatarColor: true } },
-} as const
 
 /** 清理文件名中的控制字符与路径分隔符，保留中文等正常字符 */
 function sanitizeFileName(name: string): string {
@@ -66,23 +54,29 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: '文件读取失败，请重试' }, { status: 500 })
   }
 
-  const message = await db.message
-    .create({
-      data: {
-        type: 'file',
-        fileName: displayName,
-        fileType: mimeType,
-        fileSize: file.size,
-        isImage,
-        fileData,
-        userId: user.id,
-      },
-      select: MESSAGE_SELECT,
-    })
-    .catch(() => null)
+  const rows = await query<{ id: string; seq: number; type: string; createdAt: Date }>(
+    `INSERT INTO "Message" ("id", "type", "fileName", "fileType", "fileSize", "isImage", "fileData", "userId", "createdAt")
+     VALUES ($1, 'file', $2, $3, $4, $5, $6, $7, now())
+     RETURNING "id", "seq", "type", "createdAt"`,
+    [randomUUID(), displayName, mimeType, file.size, isImage, fileData, user.id]
+  ).catch(() => null)
 
-  if (!message) {
+  if (!rows || rows.length === 0) {
     return Response.json({ error: '文件保存失败，请重试' }, { status: 500 })
+  }
+  const r = rows[0]
+
+  const message = {
+    id: r.id,
+    seq: r.seq,
+    type: r.type,
+    content: null,
+    fileName: displayName,
+    fileType: mimeType,
+    fileSize: file.size,
+    isImage,
+    createdAt: r.createdAt,
+    user: { id: user.id, username: user.username, avatarColor: user.avatarColor },
   }
 
   await broadcastEvent('new-message', message)

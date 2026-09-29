@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { format } from 'date-fns'
 import type { ChatMessage } from '@/types/chat'
 import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/chat/user-avatar'
@@ -16,7 +15,8 @@ interface Props {
 
 /** 单条聊天气泡：自己的消息靠右（绿色），他人靠左（灰色），连续消息紧凑排列 */
 export function MessageItem({ message, isOwn, compact, onPreviewImage }: Props) {
-  const time = format(new Date(message.createdAt), 'HH:mm')
+  const d = new Date(message.createdAt)
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
   return (
     <motion.div

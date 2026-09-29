@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { db } from '@/lib/db'
+import { query } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
 
 export const runtime = 'nodejs'
@@ -18,10 +18,16 @@ export async function GET(
     return Response.json({ error: '无效的文件 ID' }, { status: 400 })
   }
 
-  const message = await db.message.findUnique({
-    where: { id },
-    select: { fileName: true, fileType: true, fileSize: true, fileData: true },
-  })
+  const rows = await query<{
+    fileName: string | null
+    fileType: string | null
+    fileSize: number | null
+    fileData: Buffer
+  }>(
+    'SELECT "fileName", "fileType", "fileSize", "fileData" FROM "Message" WHERE "id" = $1',
+    [id]
+  )
+  const message = rows[0]
   if (!message || !message.fileData) {
     return Response.json({ error: '文件已丢失或已被清理' }, { status: 404 })
   }

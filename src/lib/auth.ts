@@ -1,6 +1,6 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { SignJWT, jwtVerify } from 'jose'
-import { db } from '@/lib/db'
+import { query } from '@/lib/db'
 
 // JWT 密钥：优先用环境变量（须非空）；否则从 DATABASE_URL 派生。
 // 注意：?? 防不住「空字符串」（Vercel 上误配空 JWT_SECRET 曾导致
@@ -48,13 +48,6 @@ export async function signToken(user: {
     .sign(secretKey)
 }
 
-const USER_SELECT = {
-  id: true,
-  username: true,
-  avatarColor: true,
-  createdAt: true,
-} as const
-
 /** 优先从 Authorization: Bearer 解析当前用户，解析失败返回 null */
 export async function getUserFromRequest(req: Request): Promise<SafeUser | null> {
   const authHeader = req.headers.get('authorization')
@@ -64,11 +57,13 @@ export async function getUserFromRequest(req: Request): Promise<SafeUser | null>
     const { payload } = await jwtVerify(token, secretKey)
     const userId = typeof payload.sub === 'string' ? payload.sub : null
     if (!userId) return null
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: USER_SELECT,
-    })
-    return user
+    const rows = await query<{
+      id: string
+      username: string
+      avatarColor: string
+      createdAt: Date
+    }>('SELECT "id", "username", "avatarColor", "createdAt" FROM "User" WHERE "id" = $1', [userId])
+    return rows[0] ?? null
   } catch {
     return null
   }

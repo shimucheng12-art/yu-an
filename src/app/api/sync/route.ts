@@ -1,12 +1,13 @@
 import type { NextRequest } from 'next/server'
-import { db } from '@/lib/db'
+import { query } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
+import { MESSAGE_SQL_SELECT, mapMessageRow, type MessageRow } from '@/lib/message-sql'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
- * 轮询同步接口（无长连接平台如 Vercel 的实时替代方案）：
+ * 轮询同步接口（无长连接平台的实时替代方案）：
  * - GET /api/sync?after=<seq>&typing=0|1
  * - 副作用：刷新当前用户 lastSeen（心跳），按需续期 typingUntil（正在输入）
  * - 返回：增量消息（seq > after）+ 在线成员 + 正在输入的其他成员
@@ -30,44 +31,41 @@ export async function GET(req: NextRequest) {
   const isTyping = searchParams.get('typing') === '1'
 
   const now = new Date()
+  const onlineSince = new Date(now.getTime() - ONLINE_WINDOW_MS)
+  const typingUntil = isTyping ? new Date(now.getTime() + TYPING_TTL_MS) : null
 
   // 心跳 + 输入状态上报（一次写）
-  await db.user.update({
-    where: { id: user.id },
-    data: {
-      lastSeen: now,
-      typingUntil: isTyping ? new Date(now.getTime() + TYPING_TTL_MS) : null,
-    },
-  })
+  await query(
+    'UPDATE "User" SET "lastSeen" = $1, "typingUntil" = $2, "updatedAt" = now() WHERE "id" = $3',
+    [now, typingUntil, user.id]
+  )
 
   // 增量消息 + 在线成员，并行查询
-  const [messages, activeUsers] = await Promise.all([
-    db.message.findMany({
-      where: { seq: { gt: afterSeq } },
-      orderBy: { seq: 'asc' },
-      take: 100,
-      select: {
-        id: true,
-        seq: true,
-        type: true,
-        content: true,
-        fileName: true,
-        fileType: true,
-        fileSize: true,
-        isImage: true,
-        createdAt: true,
-        user: { select: { id: true, username: true, avatarColor: true } },
-      },
-    }),
-    db.user.findMany({
-      where: { lastSeen: { gt: new Date(now.getTime() - ONLINE_WINDOW_MS) } },
-      select: { id: true, username: true, avatarColor: true, typingUntil: true },
-      orderBy: { username: 'asc' },
-    }),
+  const [messageRows, activeUsers] = await Promise.all([
+    query<MessageRow>(
+      `SELECT ${MESSAGE_SQL_SELECT}
+       FROM "Message" m JOIN "User" u ON u."id" = m."userId"
+       WHERE m."seq" > $1
+       ORDER BY m."seq" ASC
+       LIMIT 100`,
+      [afterSeq]
+    ),
+    query<{
+      id: string
+      username: string
+      avatarColor: string
+      typingUntil: Date | null
+    }>(
+      `SELECT "id", "username", "avatarColor", "typingUntil"
+       FROM "User"
+       WHERE "lastSeen" > $1
+       ORDER BY "username" ASC`,
+      [onlineSince]
+    ),
   ])
 
   return Response.json({
-    messages,
+    messages: messageRows.map(mapMessageRow),
     online: activeUsers.map((u) => ({
       userId: u.id,
       username: u.username,
