@@ -53,5 +53,10 @@ export default function Home() {
     return <AuthScreen onAuthed={handleAuthed} />
   }
 
-  return <ChatApp user={user} onLogout={handleLogout} />
+  const handleUserUpdated = (updated: AuthUser, token?: string) => {
+    if (token) setToken(token)
+    setUser(updated)
+  }
+
+  return <ChatApp user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
 }

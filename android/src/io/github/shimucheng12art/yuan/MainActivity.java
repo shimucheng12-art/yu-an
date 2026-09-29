@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.webkit.CookieManager;
+import android.webkit.PermissionRequest;
 import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -40,6 +42,8 @@ public class MainActivity extends Activity {
 
     private String homeUrl;
     private static final int REQ_FILE = 42;
+    private static final int REQ_MIC = 43;
+    private PermissionRequest pendingPerm;
 
     private WebView web;
     private ValueCallback<Uri[]> fileCb;
@@ -88,6 +92,28 @@ public class MainActivity extends Activity {
         });
 
         web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(final PermissionRequest req) {
+                // 语音消息：WebView 内 getUserMedia 麦克风授权（Android 6+ 还要系统运行时权限）
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        for (String r : req.getResources()) {
+                            if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) {
+                                if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+                                        == PackageManager.PERMISSION_GRANTED) {
+                                    req.grant(req.getResources());
+                                } else {
+                                    pendingPerm = req;
+                                    requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, REQ_MIC);
+                                }
+                                return;
+                            }
+                        }
+                        req.deny();
+                    }
+                });
+            }
+
             @Override
             public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams p) {
                 if (fileCb != null) fileCb.onReceiveValue(null);
@@ -201,6 +227,23 @@ public class MainActivity extends Activity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQ_MIC) {
+            if (pendingPerm != null) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pendingPerm.grant(pendingPerm.getResources());
+                } else {
+                    pendingPerm.deny();
+                    Toast.makeText(this, "需要麦克风权限才能发送语音", Toast.LENGTH_SHORT).show();
+                }
+                pendingPerm = null;
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

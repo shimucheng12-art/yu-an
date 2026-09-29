@@ -113,7 +113,7 @@ export async function fcGetData(token: string): Promise<{ data: SuiBlob | null }
   }
 }
 
-/** 把碎碎念数据包中「日记 + 小确幸」写入余安广场缓存（整删整插，简单且幂等） */
+/** 把碎碎念数据包中「日记 + 小确幸」写入余安广场缓存（upsert，保留 published 标记） */
 export async function syncSquareFromBlob(userId: string, blob: SuiBlob): Promise<number> {
   const diaries = Array.isArray(blob.diaries) ? blob.diaries : []
   const records = Array.isArray(blob.records) ? blob.records : []
@@ -162,15 +162,28 @@ export async function syncSquareFromBlob(userId: string, blob: SuiBlob): Promise
     })
   }
 
-  await query('DELETE FROM "SquareItem" WHERE "userId" = $1', [userId])
   for (const row of rows) {
     if (!row.id || row.id.length <= 2) continue
     await query(
-      `INSERT INTO "SquareItem" ("id", "userId", "type", "title", "content", "mood", "category", "images", "happenedAt", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, now(), now())
-       ON CONFLICT ("id") DO NOTHING`,
+      `INSERT INTO "SquareItem" ("id", "userId", "type", "title", "content", "mood", "category", "images", "happenedAt", "createdAt", "updatedAt", "published")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, now(), now(), false)
+       ON CONFLICT ("id") DO UPDATE SET
+         "type" = EXCLUDED."type", "title" = EXCLUDED."title", "content" = EXCLUDED."content",
+         "mood" = EXCLUDED."mood", "category" = EXCLUDED."category", "images" = EXCLUDED."images",
+         "happenedAt" = EXCLUDED."happenedAt", "updatedAt" = now()
+       WHERE "SquareItem"."userId" = $2`,
       [row.id, userId, row.type, row.title, row.content, row.mood, row.category, JSON.stringify(row.images), row.happenedAt]
     )
+  }
+  // 删除碎碎念里已不存在的条目（保留 published 状态的条目不受影响）
+  const keepIds = rows.map((r) => r.id).filter((x) => x && x.length > 2)
+  if (keepIds.length > 0) {
+    await query(
+      'DELETE FROM "SquareItem" WHERE "userId" = $1 AND NOT ("id" = ANY($2::text[]))',
+      [userId, keepIds]
+    )
+  } else {
+    await query('DELETE FROM "SquareItem" WHERE "userId" = $1', [userId])
   }
   await query('UPDATE "User" SET "fcSyncedAt" = now() WHERE "id" = $1', [userId])
   return rows.length

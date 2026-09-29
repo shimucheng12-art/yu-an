@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { query } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
 import { broadcastEvent } from '@/lib/socket-admin'
+import { loadConversation } from '@/lib/conversation'
 import { MESSAGE_SQL_SELECT, mapMessageRow, type MessageRow } from '@/lib/message-sql'
 
 export const runtime = 'nodejs'
@@ -17,7 +18,10 @@ function parseLimit(value: string | null): number {
   return Math.min(n, MAX_LIMIT)
 }
 
-/** 拉取历史消息（云端持久化），支持 before 游标向上翻页 */
+/**
+ * 拉取历史消息（云端持久化），支持 before 游标向上翻页。
+ * ?conversation=<id> → 该私聊会话的消息；缺省 → 大厅（conversationId IS NULL）
+ */
 export async function GET(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return unauthorized()
@@ -28,29 +32,39 @@ export async function GET(req: NextRequest) {
   const before = beforeRaw ? new Date(beforeRaw) : null
   const hasBefore = before !== null && !Number.isNaN(before.getTime())
 
+  const conversationRaw = searchParams.get('conversation')
+  let convFilter = 'm."conversationId" IS NULL'
+  if (conversationRaw) {
+    const conv = await loadConversation(conversationRaw, user.id)
+    if (!conv) return Response.json({ error: '会话不存在' }, { status: 404 })
+    convFilter = 'm."conversationId" = $conv'
+  }
+
+  const params: Record<string, unknown> = { limit: limit + 1 }
+  if (hasBefore) params.before = before
+  if (conversationRaw) params.conv = conversationRaw
+
   const rows = await query<MessageRow>(
     `SELECT ${MESSAGE_SQL_SELECT}
      FROM "Message" m JOIN "User" u ON u."id" = m."userId"
-     ${hasBefore ? 'WHERE m."createdAt" < $1' : ''}
+     WHERE ${convFilter}${hasBefore ? ' AND m."createdAt" < $before' : ''}
      ORDER BY m."createdAt" DESC
-     LIMIT $${hasBefore ? 2 : 1}`,
-    hasBefore ? [before, limit + 1] : [limit + 1]
+     LIMIT $limit`,
+    params as unknown as unknown[]
   )
 
   const hasMore = rows.length > limit
-  const page = (hasMore ? rows.slice(0, limit) : rows)
-    .map(mapMessageRow)
-    .reverse()
+  const page = (hasMore ? rows.slice(0, limit) : rows).map(mapMessageRow).reverse()
 
   return Response.json({ messages: page, hasMore })
 }
 
-/** 发送文字消息：持久化后广播 */
+/** 发送文字消息：持久化后广播（支持 conversationId 私聊） */
 export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return unauthorized()
 
-  let body: { content?: unknown }
+  let body: { content?: unknown; conversationId?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -65,11 +79,18 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: '消息过长（最多 4000 字）' }, { status: 400 })
   }
 
+  const conversationId =
+    typeof body.conversationId === 'string' && body.conversationId ? body.conversationId : null
+  if (conversationId) {
+    const conv = await loadConversation(conversationId, user.id)
+    if (!conv) return Response.json({ error: '会话不存在' }, { status: 404 })
+  }
+
   const rows = await query<{ id: string; seq: number; type: string; createdAt: Date }>(
-    `INSERT INTO "Message" ("id", "type", "content", "userId", "createdAt")
-     VALUES ($1, 'text', $2, $3, now())
+    `INSERT INTO "Message" ("id", "type", "content", "userId", "conversationId", "createdAt")
+     VALUES ($1, 'text', $2, $3, $4, now())
      RETURNING "id", "seq", "type", "createdAt"`,
-    [randomUUID(), content, user.id]
+    [randomUUID(), content, user.id, conversationId]
   )
   const r = rows[0]
 
@@ -83,6 +104,7 @@ export async function POST(req: NextRequest) {
     fileSize: null,
     isImage: false,
     createdAt: r.createdAt,
+    conversationId,
     user: { id: user.id, username: user.username, avatarColor: user.avatarColor },
   }
 

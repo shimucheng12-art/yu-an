@@ -9,6 +9,8 @@ interface UserRow {
   username: string
   avatarColor: string
   createdAt: Date
+  bio: string | null
+  lastSeen: Date | null
 }
 
 interface RequestRowBase {
@@ -20,7 +22,7 @@ interface RequestRowBase {
   updatedAt: Date
 }
 
-const USER_COLUMNS = `"id", "username", "avatarColor", "createdAt"`
+const USER_COLUMNS = `"id", "username", "avatarColor", "createdAt", "bio", "lastSeen"`
 
 export async function GET(req: Request) {
   const user = await getUserFromRequest(req)
@@ -45,7 +47,7 @@ export async function GET(req: Request) {
 
   const [friends, incoming, outgoing] = await Promise.all([
     query<UserRow>(
-      `SELECT u."id", u."username", u."avatarColor", u."createdAt"
+      `SELECT u."id", u."username", u."avatarColor", u."createdAt", u."bio", u."lastSeen"
        FROM "Friendship" f JOIN "User" u ON u."id" = f."friendId"
        WHERE f."userId" = $1
        ORDER BY f."createdAt" DESC`,

@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { query } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
 import { broadcastEvent } from '@/lib/socket-admin'
+import { loadConversation } from '@/lib/conversation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,13 @@ function sanitizeFileName(name: string): string {
   return cleaned.slice(0, 120) || 'unnamed'
 }
 
-/** 上传文件：保存到服务器（云端储存），生成文件消息并广播 */
+/**
+ * 上传文件：保存到服务器（云端储存），生成文件消息并广播。
+ * form 字段：
+ *   file          — 文件本体
+ *   conversationId — 可选，私聊会话
+ *   duration      — 可选，语音时长（秒），音频文件按语音消息处理
+ */
 export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return unauthorized()
@@ -42,9 +49,22 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: '文件大小不能超过 4MB（图片会自动压缩后上传）' }, { status: 413 })
   }
 
-  const displayName = sanitizeFileName(file.name || 'unnamed')
+  const conversationField = form.get('conversationId')
+  const conversationId =
+    typeof conversationField === 'string' && conversationField ? conversationField : null
+  if (conversationId) {
+    const conv = await loadConversation(conversationId, user.id)
+    if (!conv) return Response.json({ error: '会话不存在' }, { status: 404 })
+  }
+
+  const durationField = form.get('duration')
+  const duration = typeof durationField === 'string' ? Number.parseFloat(durationField) : NaN
+
   const mimeType = file.type || 'application/octet-stream'
   const isImage = mimeType.startsWith('image/')
+  const isVoice = mimeType.startsWith('audio/') && !Number.isNaN(duration) && duration > 0
+
+  const displayName = isVoice ? `语音消息` : sanitizeFileName(file.name || 'unnamed')
 
   // 文件二进制直接存数据库（serverless 平台文件系统只读，不能落盘）
   let fileData: Buffer
@@ -55,10 +75,21 @@ export async function POST(req: NextRequest) {
   }
 
   const rows = await query<{ id: string; seq: number; type: string; createdAt: Date }>(
-    `INSERT INTO "Message" ("id", "type", "fileName", "fileType", "fileSize", "isImage", "fileData", "userId", "createdAt")
-     VALUES ($1, 'file', $2, $3, $4, $5, $6, $7, now())
+    `INSERT INTO "Message" ("id", "type", "content", "fileName", "fileType", "fileSize", "isImage", "fileData", "userId", "conversationId", "createdAt")
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now())
      RETURNING "id", "seq", "type", "createdAt"`,
-    [randomUUID(), displayName, mimeType, file.size, isImage, fileData, user.id]
+    [
+      randomUUID(),
+      isVoice ? 'voice' : 'file',
+      isVoice ? String(Math.round(duration)) : null,
+      displayName,
+      mimeType,
+      file.size,
+      isImage,
+      fileData,
+      user.id,
+      conversationId,
+    ]
   ).catch(() => null)
 
   if (!rows || rows.length === 0) {
@@ -70,12 +101,13 @@ export async function POST(req: NextRequest) {
     id: r.id,
     seq: r.seq,
     type: r.type,
-    content: null,
+    content: isVoice ? String(Math.round(duration)) : null,
     fileName: displayName,
     fileType: mimeType,
     fileSize: file.size,
     isImage,
     createdAt: r.createdAt,
+    conversationId,
     user: { id: user.id, username: user.username, avatarColor: user.avatarColor },
   }
 

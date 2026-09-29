@@ -30,6 +30,16 @@ export async function GET(req: NextRequest) {
   const afterSeq = Number.isNaN(after) || after < 0 ? 0 : after
   const isTyping = searchParams.get('typing') === '1'
 
+  // conversation 参数：私聊会话增量；缺省 → 大厅
+  const conversationRaw = searchParams.get('conversation')
+  let convFilter = 'm."conversationId" IS NULL'
+  if (conversationRaw) {
+    const { loadConversation } = await import('@/lib/conversation')
+    const conv = await loadConversation(conversationRaw, user.id)
+    if (!conv) return Response.json({ error: '会话不存在' }, { status: 404 })
+    convFilter = 'm."conversationId" = $2'
+  }
+
   const now = new Date()
   const onlineSince = new Date(now.getTime() - ONLINE_WINDOW_MS)
   const typingUntil = isTyping ? new Date(now.getTime() + TYPING_TTL_MS) : null
@@ -45,10 +55,10 @@ export async function GET(req: NextRequest) {
     query<MessageRow>(
       `SELECT ${MESSAGE_SQL_SELECT}
        FROM "Message" m JOIN "User" u ON u."id" = m."userId"
-       WHERE m."seq" > $1
+       WHERE m."seq" > $1 AND ${convFilter}
        ORDER BY m."seq" ASC
        LIMIT 100`,
-      [afterSeq]
+      conversationRaw ? [afterSeq, conversationRaw] : [afterSeq]
     ),
     query<{
       id: string

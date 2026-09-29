@@ -5,6 +5,7 @@ import type { ChatMessage } from '@/types/chat'
 import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/chat/user-avatar'
 import { FileBubble } from '@/components/chat/file-bubble'
+import { VoiceBubble } from '@/components/chat/voice-bubble'
 
 interface Props {
   message: ChatMessage
@@ -45,6 +46,8 @@ export function MessageItem({ message, isOwn, compact, onPreviewImage }: Props) 
         >
           {message.type === 'file' ? (
             <FileBubble message={message} isOwn={isOwn} onPreviewImage={onPreviewImage} />
+          ) : message.type === 'voice' ? (
+            <VoiceBubble message={message} isOwn={isOwn} />
           ) : (
             <p className="whitespace-pre-wrap break-words">{message.content}</p>
           )}
