@@ -65,8 +65,8 @@ jobs:
           [ -n "$TOKEN" ] || { echo "❌ 注册/登录均未拿到 token"; exit 1; }
           echo "TOKEN 长度: ${#TOKEN}"
 
-          echo "== [3] 身份校验 /api/auth/me =="
-          OUT=$(req GET /api/auth/me); echo "$OUT" | tail -2
+          echo "== [3] 身份校验 /api/me =="
+          OUT=$(req GET /api/me); echo "$OUT" | tail -2
 
           echo "== [4] 轮询同步 /api/sync =="
           OUT=$(req GET "/api/sync?after=0&typing=0"); echo "$OUT" | head -c 400; echo; echo "$OUT" | tail -1
