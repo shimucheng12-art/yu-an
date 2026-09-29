@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowDown, Cloud, Loader2, LogOut, MessageCircle, Paperclip, Send, UserPlus, Users } from 'lucide-react'
+import { ArrowDown, BookHeart, Cloud, Loader2, LogOut, MessageCircle, Paperclip, Send, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { ApiError, api, downloadBlob } from '@/lib/api-client'
 import { compressImageIfNeeded } from '@/lib/compress'
@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { UserAvatar } from '@/components/chat/user-avatar'
 import { MessageItem } from '@/components/chat/message-item'
 import { FriendsDialog } from '@/components/chat/friends-dialog'
+import { SquareDialog } from '@/components/chat/square-dialog'
 
 interface Props {
   user: AuthUser
@@ -52,6 +53,7 @@ export function ChatApp({ user, onLogout }: Props) {
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const [imageViewer, setImageViewer] = useState<{ message: ChatMessage; url: string } | null>(null)
   const [friendsOpen, setFriendsOpen] = useState(false)
+  const [squareOpen, setSquareOpen] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const nearBottomRef = useRef(true)
@@ -404,6 +406,17 @@ export function ChatApp({ user, onLogout }: Props) {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => setSquareOpen(true)}
+            aria-label="广场"
+            title="广场"
+            className="rounded-full"
+          >
+            <BookHeart className="h-4 w-4" aria-hidden="true" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setFriendsOpen(true)}
             aria-label="好友"
             title="好友"
@@ -594,6 +607,7 @@ export function ChatApp({ user, onLogout }: Props) {
       </div>
 
       <FriendsDialog user={user} open={friendsOpen} onOpenChange={setFriendsOpen} />
+      <SquareDialog user={user} open={squareOpen} onOpenChange={setSquareOpen} />
 
       {/* 图片查看器 */}
       <Dialog open={!!imageViewer} onOpenChange={(open) => !open && setImageViewer(null)}>

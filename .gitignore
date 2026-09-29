@@ -33,3 +33,4 @@ android/build/
 yu-an.keystore
 android/yu-an.keystore
 *.apk.idsig
+node_modules.old/
