@@ -34,23 +34,26 @@ export async function GET(req: NextRequest) {
 
   const conversationRaw = searchParams.get('conversation')
   let convFilter = 'm."conversationId" IS NULL'
+  const params: unknown[] = []
   if (conversationRaw) {
     const conv = await loadConversation(conversationRaw, user.id)
     if (!conv) return Response.json({ error: '会话不存在' }, { status: 404 })
-    convFilter = 'm."conversationId" = $conv'
+    params.push(conversationRaw)
+    convFilter = `m."conversationId" = $${params.length}`
   }
-
-  const params: Record<string, unknown> = { limit: limit + 1 }
-  if (hasBefore) params.before = before
-  if (conversationRaw) params.conv = conversationRaw
+  if (hasBefore) {
+    params.push(before)
+    convFilter += ` AND m."createdAt" < $${params.length}`
+  }
+  params.push(limit + 1)
 
   const rows = await query<MessageRow>(
     `SELECT ${MESSAGE_SQL_SELECT}
      FROM "Message" m JOIN "User" u ON u."id" = m."userId"
-     WHERE ${convFilter}${hasBefore ? ' AND m."createdAt" < $before' : ''}
+     WHERE ${convFilter}
      ORDER BY m."createdAt" DESC
-     LIMIT $limit`,
-    params as unknown as unknown[]
+     LIMIT $${params.length}`,
+    params
   )
 
   const hasMore = rows.length > limit
