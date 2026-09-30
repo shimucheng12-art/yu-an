@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     isImage: false,
     createdAt: r.createdAt,
     conversationId,
-    user: { id: user.id, username: user.username, avatarColor: user.avatarColor },
+    user: { id: user.id, username: user.username, avatarColor: user.avatarColor, avatarImageId: user.avatarImageId ?? null },
   }
 
   await broadcastEvent('new-message', message)

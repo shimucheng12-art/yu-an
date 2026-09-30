@@ -2,28 +2,40 @@ export interface AuthUser {
   id: string
   username: string
   avatarColor: string
+  avatarImageId?: string | null
   createdAt: string
   phone?: string | null
   bio?: string | null
   lastSeen?: string | null
 }
 
-/** 一对一会话（好友私聊） */
+/** 会话（好友私聊或群聊） */
 export interface ConversationItem {
   id: string
-  friend: AuthUser
+  kind: 'dm' | 'group'
+  /** 私聊对方（dm） */
+  friend?: AuthUser
+  /** 群名（group） */
+  name?: string | null
+  /** 群/用户头像（group=群头像；dm=对方头像） */
+  avatarImageId?: string | null
+  /** 群成员数（group） */
+  memberCount?: number
+  /** 我是否群主（group） */
+  isOwner?: boolean
   lastMessage?: {
     content: string | null
     type: string
     createdAt: string
     senderName: string
   } | null
+  lastAt?: string | null
 }
 
 export interface ChatMessage {
   id: string
   seq: number
-  type: 'text' | 'file' | 'voice'
+  type: 'text' | 'file' | 'voice' | 'system'
   content: string | null
   fileName: string | null
   fileType: string | null
@@ -38,6 +50,7 @@ export interface MessageUser {
   id: string
   username: string
   avatarColor: string
+  avatarImageId?: string | null
 }
 
 export interface OnlineUser {

@@ -20,6 +20,7 @@ export interface SafeUser {
   createdAt: Date
   phone?: string | null
   bio?: string | null
+  avatarImageId?: string | null
 }
 
 /** scrypt 加盐哈希，格式：salt:hash */
@@ -66,8 +67,9 @@ export async function getUserFromRequest(req: Request): Promise<SafeUser | null>
       createdAt: Date
       phone: string | null
       bio: string | null
+      avatarImageId: string | null
     }>(
-      'SELECT "id", "username", "avatarColor", "createdAt", "phone", "bio" FROM "User" WHERE "id" = $1',
+      'SELECT "id", "username", "avatarColor", "createdAt", "phone", "bio", "avatarImageId" FROM "User" WHERE "id" = $1',
       [userId]
     )
     return rows[0] ?? null

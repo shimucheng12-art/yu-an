@@ -6,7 +6,7 @@ import { api, clearToken, setToken } from '@/lib/api-client'
 import { destroySocket } from '@/lib/socket'
 import type { AuthUser } from '@/types/chat'
 import { AuthScreen } from '@/components/chat/auth-screen'
-import { ChatApp } from '@/components/chat/chat-app'
+import { AppShell } from '@/components/chat/app-shell'
 
 type Status = 'loading' | 'guest' | 'authed'
 
@@ -58,5 +58,5 @@ export default function Home() {
     setUser(updated)
   }
 
-  return <ChatApp user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
+  return <AppShell user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
 }

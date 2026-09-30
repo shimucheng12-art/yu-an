@@ -4,13 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import {
   ArrowDown,
   ArrowLeft,
-  BookHeart,
   Cloud,
   Loader2,
   Mic,
   Paperclip,
   Send,
   Trash2,
+  Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ApiError, api, downloadBlob } from '@/lib/api-client'
@@ -23,14 +23,21 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog'
 import { UserAvatar } from '@/components/chat/user-avatar'
 import { MessageItem } from '@/components/chat/message-item'
-import { FriendsDialog } from '@/components/chat/friends-dialog'
-import { SquareDialog } from '@/components/chat/square-dialog'
-import { Sidebar } from '@/components/chat/sidebar'
+import { GroupInfoDialog } from '@/components/chat/group-info-dialog'
+import { markRead } from '@/components/chat/conversations-view'
 
 interface Props {
   user: AuthUser
   onLogout: () => void
   onUserUpdated: (user: AuthUser, token?: string) => void
+  /** 外部（Tab 首页）打开时传入的初始会话；null = 大厅 */
+  initialConversation?: ConversationItem | null
+  /** 返回上一级（关闭全屏聊天层） */
+  onExit?: () => void
+  /** 会话信息变化（群改名/换头像/人数变化） */
+  onConversationUpdated?: (patch: Partial<ConversationItem>) => void
+  /** 会话已不存在（解散/被移出） */
+  onConversationClosed?: () => void
 }
 
 type ListItem =
@@ -43,7 +50,15 @@ const HISTORY_LIMIT = 60
 const MIN_VOICE_SEC = 1
 const MAX_VOICE_SEC = 60
 
-export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
+export function ChatApp({
+  user,
+  onLogout,
+  onUserUpdated,
+  initialConversation = null,
+  onExit,
+  onConversationUpdated,
+  onConversationClosed,
+}: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [notices, setNotices] = useState<SystemNotice[]>([])
   const [input, setInput] = useState('')
@@ -51,13 +66,11 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
   const [newCount, setNewCount] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const [imageViewer, setImageViewer] = useState<{ message: ChatMessage; url: string } | null>(null)
-  const [friendsOpen, setFriendsOpen] = useState(false)
-  const [squareOpen, setSquareOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [groupInfoOpen, setGroupInfoOpen] = useState(false)
   const [historyLoading, setHistoryLoading] = useState(true)
 
-  // 当前私聊会话（null = 大厅）
-  const [activeConv, setActiveConv] = useState<ConversationItem | null>(null)
+  // 当前会话（null = 大厅；好友私聊/群聊）
+  const [activeConv, setActiveConv] = useState<ConversationItem | null>(initialConversation)
 
   // 录音状态
   const [recording, setRecording] = useState(false)
@@ -121,21 +134,20 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
     }
   }, [scrollToBottom])
 
-  const openConversation = useCallback((conv: ConversationItem) => {
-    setActiveConv(conv)
-    setNewCount(0)
-    void loadHistory(conv)
-  }, [loadHistory])
-
   const exitConversation = useCallback(() => {
+    // 新版结构：聊天页是全屏层，返回即关闭
+    if (onExit) {
+      onExit()
+      return
+    }
     setActiveConv(null)
     setNewCount(0)
     void loadHistory(null)
-  }, [loadHistory])
+  }, [loadHistory, onExit])
 
   useEffect(() => {
-    void loadHistory(null)
-  }, [loadHistory])
+    void loadHistory(initialConversation)
+  }, [loadHistory, initialConversation])
 
   /** 轮询：大厅与私聊共用一个 sync 接口（conversation 参数区分） */
   useEffect(() => {
@@ -156,6 +168,7 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
         if (cancelled) return
         setConnected(true)
         if (data.messages.length > 0) {
+          if (conv) markRead(conv.id)
           const lastSeq = data.messages[data.messages.length - 1].seq
           if (lastSeq > lastSeqRef.current) lastSeqRef.current = lastSeq
           for (const message of data.messages) appendMessage(message)
@@ -401,26 +414,50 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       {/* 顶栏 */}
       <header className="flex shrink-0 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur sm:px-4">
-        {friend ? (
-          <>
-            <Button variant="ghost" size="icon" onClick={exitConversation} aria-label="返回大厅" className="rounded-full">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Button>
-            <UserAvatar user={friend} className="h-8 w-8 text-sm" />
+        <Button variant="ghost" size="icon" onClick={exitConversation} aria-label="返回" className="rounded-full">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        </Button>
+
+        {activeConv ? (
+          <button
+            type="button"
+            onClick={() => activeConv.kind === 'group' && setGroupInfoOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            aria-label={activeConv.kind === 'group' ? '查看群资料' : undefined}
+          >
+            {activeConv.kind === 'group' ? (
+              <UserAvatar user={user} group={{ name: activeConv.name, avatarImageId: activeConv.avatarImageId }} className="h-8 w-8 text-sm" />
+            ) : (
+              <UserAvatar
+                user={{ username: friend?.username ?? '?', avatarColor: friend?.avatarColor ?? '#10b981', avatarImageId: friend?.avatarImageId }}
+                className="h-8 w-8 text-sm"
+              />
+            )}
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold leading-tight">{friend.username}</p>
-              <p className={cn('text-[11px] leading-tight', friendOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground')}>
-                {friendOnline ? '在线' : '离线'}
-              </p>
+              {activeConv.kind === 'group' ? (
+                <>
+                  <p className="truncate text-sm font-semibold leading-tight">
+                    {activeConv.name ?? '群聊'}（{activeConv.memberCount ?? ''}）
+                  </p>
+                  <p className="text-[11px] leading-tight text-muted-foreground">点击查看群资料</p>
+                </>
+              ) : (
+                <>
+                  <p className="truncate text-sm font-semibold leading-tight">{friend?.username}</p>
+                  <p className={cn('text-[11px] leading-tight', friendOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground')}>
+                    {friendOnline ? '在线' : '离线'}
+                  </p>
+                </>
+              )}
             </div>
-          </>
+          </button>
         ) : (
-          <>
-            <Cloud className="h-5 w-5 text-primary" aria-hidden="true" />
-            <h1 className="text-base font-semibold tracking-tight">余安</h1>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Cloud className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+            <h1 className="text-base font-semibold tracking-tight">余安 · 公共大厅</h1>
             <span
               className={cn(
-                'ml-2 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                'ml-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
                 connected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'
               )}
               role="status"
@@ -428,24 +465,15 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
               <span className={cn('mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle', connected ? 'bg-emerald-500' : 'animate-pulse bg-amber-500')} aria-hidden="true" />
               {connected ? '已连接' : '连接中…'}
             </span>
-          </>
+          </div>
         )}
 
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          {!friend && (
-            <Button variant="ghost" size="icon" onClick={() => setSquareOpen(true)} aria-label="广场" title="广场" className="rounded-full">
-              <BookHeart className="h-4 w-4" aria-hidden="true" />
+        <div className="ml-auto flex items-center gap-1">
+          {activeConv?.kind === 'group' && (
+            <Button variant="ghost" size="icon" onClick={() => setGroupInfoOpen(true)} aria-label="群资料" title="群资料" className="rounded-full">
+              <Users className="h-4 w-4" aria-hidden="true" />
             </Button>
           )}
-          {/* 右上角头像：点击划出侧边栏 */}
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="打开侧边栏"
-            className="ml-1 rounded-full ring-offset-2 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
-          >
-            <UserAvatar user={user} className="h-8 w-8 text-sm" />
-          </button>
         </div>
       </header>
 
@@ -469,10 +497,15 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
                     <p className="text-sm">和 {friend.username} 的私聊还是空的</p>
                     <p className="text-xs">说点什么吧，也可以发图片、文件和语音</p>
                   </>
+                ) : activeConv?.kind === 'group' ? (
+                  <>
+                    <p className="text-sm">群聊还是空的</p>
+                    <p className="text-xs">发条消息让大家热闹起来吧</p>
+                  </>
                 ) : (
                   <>
                     <p className="text-sm">还没有消息</p>
-                    <p className="text-xs">点右上角头像打开侧边栏，找好友私聊</p>
+                    <p className="text-xs">公共大厅，所有在线伙伴都在这里</p>
                   </>
                 )}
               </div>
@@ -491,6 +524,13 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
                   return (
                     <div key={item.key} className="my-2 text-center text-[11px] text-muted-foreground" role="status">
                       {item.notice.kind === 'join' ? `${item.notice.username} 来了` : `${item.notice.username} 离开了`}
+                    </div>
+                  )
+                }
+                if (item.message.type === 'system') {
+                  return (
+                    <div key={item.key} className="my-2 text-center text-[11px] text-muted-foreground" role="status">
+                      {item.message.content}
                     </div>
                   )
                 }
@@ -556,7 +596,13 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
                   value={input}
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={friend ? `和 ${friend.username} 私聊…` : '说点什么…'}
+                  placeholder={
+                    activeConv?.kind === 'group'
+                      ? `在 ${activeConv.name ?? '群聊'} 里说点什么…`
+                      : friend
+                        ? `和 ${friend.username} 私聊…`
+                        : '说点什么…'
+                  }
                   className="min-h-[2.5rem] max-h-32 resize-none rounded-2xl bg-muted py-2 pr-2 text-sm"
                   rows={1}
                   aria-label="消息输入框"
@@ -607,20 +653,23 @@ export function ChatApp({ user, onLogout, onUserUpdated }: Props) {
         </main>
       </div>
 
-      {/* 侧边栏（个人中心 + 好友 + 会话） */}
-      <Sidebar
-        user={user}
-        open={sidebarOpen}
-        onOpenChange={setSidebarOpen}
-        onOpenConversation={openConversation}
-        activeConversationId={activeConv?.id ?? null}
-        onUserUpdated={onUserUpdated}
-        onLogout={onLogout}
-        onOpenFriends={() => setFriendsOpen(true)}
-      />
-
-      <FriendsDialog user={user} open={friendsOpen} onOpenChange={setFriendsOpen} />
-      {!friend && <SquareDialog user={user} open={squareOpen} onOpenChange={setSquareOpen} />}
+      {/* 群资料（群聊时） */}
+      {activeConv?.kind === 'group' && (
+        <GroupInfoDialog
+          user={user}
+          conversation={activeConv}
+          open={groupInfoOpen}
+          onOpenChange={setGroupInfoOpen}
+          onUpdated={(patch) => {
+            setActiveConv((prev) => (prev ? { ...prev, ...patch } : prev))
+            onConversationUpdated?.(patch)
+          }}
+          onClosed={() => {
+            setGroupInfoOpen(false)
+            onConversationClosed?.()
+          }}
+        />
+      )}
 
       {/* 图片查看器 */}
       <Dialog open={!!imageViewer} onOpenChange={(open) => !open && setImageViewer(null)}>

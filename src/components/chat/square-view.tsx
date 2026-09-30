@@ -24,13 +24,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { UserAvatar } from '@/components/chat/user-avatar'
 
 interface Props {
   user: AuthUser
-  open: boolean
-  onOpenChange: (open: boolean) => void
 }
 
 type Friend = AuthUser
@@ -129,7 +126,7 @@ function ItemCard({
 }
 
 /** 广场弹窗：我的广场（动态发布 + 碎碎念管理） + 好友广场（仅好友可见） */
-export function SquareDialog({ user, open, onOpenChange }: Props) {
+export function SquareView({ user }: Props) {
   const [friends, setFriends] = useState<Friend[]>([])
   const [view, setView] = useState<'list' | 'self' | 'friend'>('list')
   const [targetUsername, setTargetUsername] = useState<string | null>(null)
@@ -212,7 +209,6 @@ export function SquareDialog({ user, open, onOpenChange }: Props) {
   }, [])
 
   useEffect(() => {
-    if (!open) return
     setView('list')
     setSquare(null)
     setMine(null)
@@ -221,7 +217,7 @@ export function SquareDialog({ user, open, onOpenChange }: Props) {
     setPostText('')
     setPostImages([])
     void loadFriends()
-  }, [open, loadFriends])
+  }, [loadFriends])
 
   const openSelf = () => {
     setView('self')
@@ -371,19 +367,16 @@ export function SquareDialog({ user, open, onOpenChange }: Props) {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex h-[85dvh] max-w-lg flex-col gap-0 overflow-hidden p-0 sm:rounded-2xl">
+      <div className="flex h-full flex-col overflow-hidden">
           {view === 'list' ? (
             <>
-              <DialogHeader className="border-b px-5 py-4">
-                <DialogTitle className="flex items-center gap-2 text-base">
-                  <BookHeart className="h-4 w-4 text-primary" aria-hidden="true" />
+              <header className="shrink-0 border-b px-5 py-4">
+                <h1 className="flex items-center gap-2 text-lg font-semibold">
+                  <BookHeart className="h-5 w-5 text-primary" aria-hidden="true" />
                   广场
-                </DialogTitle>
-                <DialogDescription className="text-xs">
-                  发布动态与碎碎念精选 · 仅好友可见
-                </DialogDescription>
-              </DialogHeader>
+                </h1>
+                <p className="text-xs text-muted-foreground">发布动态与碎碎念精选 · 仅好友可见</p>
+              </header>
               <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                 <section className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">我的广场</p>
@@ -690,8 +683,7 @@ export function SquareDialog({ user, open, onOpenChange }: Props) {
               </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
+      </div>
     </>
   )
 }
