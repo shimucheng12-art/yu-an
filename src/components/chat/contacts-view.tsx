@@ -29,10 +29,10 @@ export function ContactsView({ user, onOpenConversation, onOpenAddFriend }: Prop
 
   const load = useCallback(async () => {
     try {
-      const data = await api<{ friends: Friend[]; incoming: RequestItem[]; outgoing: RequestItem[] }>('/api/friends')
+      const data = await api<{ friends: Friend[]; incomingRequests: RequestItem[]; outgoingRequests: RequestItem[] }>('/api/friends')
       setFriends(data.friends)
-      setIncoming(data.incoming)
-      setOutgoing(data.outgoing)
+      setIncoming(data.incomingRequests)
+      setOutgoing(data.outgoingRequests)
     } catch (err) {
       if (!(err instanceof ApiError && err.status === 401)) toast.error('好友列表加载失败')
     } finally {

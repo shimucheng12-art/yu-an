@@ -71,10 +71,11 @@ export async function PATCH(req: NextRequest) {
     createdAt: Date
     phone: string | null
     bio: string | null
+    avatarImageId: string | null
   }>(
     `UPDATE "User" SET ${sets.join(', ')}, "updatedAt" = now()
      WHERE "id" = $${params.length}
-     RETURNING "id", "username", "avatarColor", "createdAt", "phone", "bio"`,
+     RETURNING "id", "username", "avatarColor", "createdAt", "phone", "bio", "avatarImageId"`,
     params
   )
   const updated = rows[0]
