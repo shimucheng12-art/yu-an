@@ -143,7 +143,7 @@ export function GroupInfoDialog({ user, conversation, open, onOpenChange, onUpda
     if (!window.confirm(`确定将「${m.username}」移出群聊？`)) return
     setBusy(true)
     try {
-      await api(`/api/groups/${conversation.id}/members`, { method: 'POST', body: JSON.stringify({ removeUserId: m.id }) })
+      await api(`/api/groups/${conversation.id}/members?userId=${encodeURIComponent(m.id)}`, { method: 'DELETE' })
       toast.success(`已将 ${m.username} 移出群聊`)
       onUpdated({ memberCount: Math.max(1, (conversation.memberCount ?? 1) - 1) })
       void load()
@@ -159,7 +159,7 @@ export function GroupInfoDialog({ user, conversation, open, onOpenChange, onUpda
     if (!window.confirm(isOwner ? '确定解散这个群聊？解散后聊天记录将删除，不可恢复。' : '确定退出这个群聊？')) return
     setBusy(true)
     try {
-      await api(`/api/groups/${conversation.id}/members`, { method: 'POST', body: JSON.stringify({ leave: true }) })
+      await api(`/api/groups/${conversation.id}/members`, { method: 'DELETE' })
       toast.success(isOwner ? '群聊已解散' : '已退出群聊')
       onOpenChange(false)
       onClosed()

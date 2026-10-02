@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { randomUUID } from 'node:crypto'
-import { query } from '@/lib/db'
+import { query, withTransaction } from '@/lib/db'
 import { getUserFromRequest, unauthorized } from '@/lib/auth'
 
 export const runtime = 'nodejs'
@@ -101,9 +101,14 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
     return Response.json({ ok: true })
   }
 
-  // 退群
+  // 退群；群主调用则解散整个群（清理消息与成员）
   if (group.createdBy === user.id) {
-    return Response.json({ error: '群主不能退出，可选择解散群聊' }, { status: 400 })
+    await withTransaction(async (client) => {
+      await client.query(`DELETE FROM "Message" WHERE "conversationId" = $1`, [id])
+      await client.query(`DELETE FROM "GroupMember" WHERE "conversationId" = $1`, [id])
+      await client.query(`DELETE FROM "Conversation" WHERE "id" = $1`, [id])
+    })
+    return Response.json({ ok: true, dissolved: true })
   }
   await query(`DELETE FROM "GroupMember" WHERE "conversationId" = $1 AND "userId" = $2`, [id, user.id])
   await query(
