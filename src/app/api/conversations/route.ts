@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
   await query(
     `INSERT INTO "Conversation" ("id", "userAId", "userBId", "createdAt")
      VALUES ($1, $2, $3, now())
-     ON CONFLICT ("userAId", "userBId") DO NOTHING`,
+     ON CONFLICT ("userAId", "userBId") WHERE NOT "isGroup" DO NOTHING`,
     [randomUUID(), a, b]
   )
   const convRows = await query<{ id: string }>(
